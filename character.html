@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>キャラクター詳細 — サザン・ヴェイル</title>
+    <meta name="description" content="命を担保に契約し、ルールを組んで戦わせる。自動戦闘の育成RPG。">
+    <meta name="theme-color" content="#ece6d8">
+    <meta property="og:title" content="サザン・ヴェイル">
+    <meta property="og:description" content="命を担保に契約し、ルールを組んで戦わせる。自動戦闘の育成RPG。">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@500;700;900&family=Cormorant+Garamond:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css?v=P9.21.1">
+    <link rel="stylesheet" href="css/theme.css?v=P9.21.1">
+    <link rel="stylesheet" href="css/fx.css?v=P9.21.1">
+</head>
+<body>
+<div class="panel detail-top">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+        <h2 id="detail-title">キャラクター詳細</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a class="btn btn-blue" href="index.html">拠点へ戻る</a>
+        </div>
+    </div>
+</div>
+
+<div id="detail-missing" class="panel" style="display:none;margin:16px;">
+    <p>キャラクターが見つかりません。</p>
+    <a class="btn btn-blue" href="index.html">拠点へ戻る</a>
+</div>
+
+<div id="detail-root" class="detail-layout" style="display:none;">
+    <div class="panel detail-header">
+        <div class="detail-stand">
+            <div id="dh-stand"></div>
+            <div class="detail-stand-tools">
+                <button type="button" class="btn btn-sm btn-blue" id="dh-portrait-btn">立ち絵を変更</button>
+                <button type="button" class="btn btn-sm btn-blue" id="dh-rename-btn">名前変更</button>
+                <button type="button" class="btn btn-sm btn-danger" id="dh-retire-btn">引退させる</button>
+            </div>
+        </div>
+        <div class="detail-name" id="dh-name">—</div>
+        <div id="dh-ssinfo" class="hint" style="margin-top:6px;"></div>
+        <div class="detail-sub">
+            <span id="dh-lv"></span> <span id="dh-levelup">Lv—</span>
+            <span id="dh-class">—</span>
+            <span id="dh-path" style="display:none;"></span>
+            <span id="dh-rarity"></span>
+            <span id="dh-bonus" class="meta"></span>
+            <span id="dh-side" class="meta"></span>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="tab-container detail-tabs">
+            <div class="tab-btn active" data-tab="status" onclick="switchDetailTab('status')">ステータス</div>
+            <div class="tab-btn" data-tab="class" onclick="switchDetailTab('class')">クラス</div>
+            <div class="tab-btn" data-tab="actions" onclick="switchDetailTab('actions')">アクション</div>
+            <div class="tab-btn" data-tab="equip" onclick="switchDetailTab('equip')">装備</div>
+        </div>
+
+        <!-- ステータス -->
+        <div id="tab-status" class="detail-tab-panel">
+            <h3>パラメータ</h3>
+            <table class="stat-table" id="stat-table">
+                <thead>
+                    <tr><th>パラメータ</th><th>現在値</th><th>成長率</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- クラス -->
+        <div id="tab-class" class="detail-tab-panel" style="display:none;">
+            <h3>現在クラス</h3>
+            <p id="class-current" class="detail-block">—</p>
+
+            <h3>クラス履歴</h3>
+            <div id="class-history" class="class-history"></div>
+
+            <h3>成長率</h3>
+            <table class="stat-table" id="growth-table">
+                <thead>
+                    <tr><th>パラメータ</th><th>成長率</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <h3>クラスチェンジ</h3>
+            <div id="cc-gate" class="hint"></div>
+            <div id="cc-mock" class="cc-mock"></div>
+        </div>
+
+        <!-- アクション -->
+        <div id="tab-actions" class="detail-tab-panel" style="display:none;">
+            <h3>使用可能アクション</h3>
+            <ul id="action-list" class="action-list"></ul>
+        </div>
+
+        <!-- 装備 -->
+        <div id="tab-equip" class="detail-tab-panel" style="display:none;">
+            <h3>装備</h3>
+            <div class="equip-slot" id="equip-accessory-slot">
+                <div class="equip-label">アクセサリー</div>
+                <div class="equip-value" id="equip-accessory-name">[未装備]</div>
+            </div>
+            <div id="equip-accessory-effects" class="hint" style="margin:8px 0;"></div>
+            <div id="equip-accessory-actions" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
+            <div id="equip-accessory-picker" style="display:none;border:1px solid #bdb299;border-radius:8px;padding:12px;background:#f1ebdb;">
+                <h3 style="margin-top:0;">アクセサリー選択</h3>
+                <div id="equip-accessory-list"></div>
+                <button type="button" class="btn btn-sm" style="margin-top:8px;" onclick="closeAccessoryPicker()">キャンセル</button>
+            </div>
+            <p class="hint">効果数値は TEST ONLY（正式バランス未決定）。成長・合成・入手は未実装。</p>
+        </div>
+    </div>
+</div>
+
+<script src="js/i18n-en.js?v=P9.21.1"></script>
+<script src="js/i18n.js?v=P9.21.1"></script>
+<script src="js/common.js?v=P9.21.1"></script>
+<script src="js/standee.js?v=P9.21.1"></script>
+<script src="js/fx.js?v=P9.21.1"></script>
+<script src="js/data.js?v=P9.21.1"></script>
+<script src="js/model.js?v=P9.21.1"></script>
+<script src="js/storage.js?v=P9.21.1"></script>
+<script src="js/recruit.js?v=P9.21.1"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="js/cloud-config.js?v=P9.21.1"></script>
+<script src="js/char-detail.js?v=P9.21.1"></script>
+<script src="js/server.js?v=P9.21.1"></script>
+</body>
+</html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>サザン・ヴェイル</title>
+    <meta name="description" content="命を担保に契約し、ルールを組んで戦わせる。自動戦闘の育成RPG。">
+    <meta name="theme-color" content="#ece6d8">
+    <meta property="og:title" content="サザン・ヴェイル">
+    <meta property="og:description" content="命を担保に契約し、ルールを組んで戦わせる。自動戦闘の育成RPG。">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@500;700;900&family=Cormorant+Garamond:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css?v=P9.21.1">
+    <link rel="stylesheet" href="css/theme.css?v=P9.21.1">
+    <link rel="stylesheet" href="css/fx.css?v=P9.21.1">
+</head>
+<body>
+<!-- 起動時のタイトル（接続が終わると消える。操作の邪魔はしない） -->
+<div id="boot-splash" class="boot-splash" aria-hidden="true">
+    <img src="img/bg/top-sm.webp" srcset="img/bg/top-sm.webp 800w, img/bg/top.webp 1600w" sizes="100vw" alt="" decoding="async" fetchpriority="high">
+    <div class="boot-title"><b>サザン・ヴェイル</b><span class="boot-sub" data-no-i18n>SOUTHERN VEIL</span><small class="boot-status">読み込み中…</small></div>
+</div>
+<!-- 共通ヘッダー -->
+<header class="app-header panel">
+    <div class="app-header-row">
+        <div class="app-brand" onclick="showScreen('home')" style="cursor:pointer;">サザン・ヴェイル</div>
+        <div class="resource-badge" id="resource-badge" title="SS（統合リソース）">
+            <span class="resource-label">SS</span>
+            <span class="resource-value" id="resource-value">0</span>
+        </div>
+        <button type="button" class="cloud-chip" id="cloud-chip" onclick="cloudOpenPanel()">☁ 接続中</button>
+        <button type="button" class="icon-btn chat-btn" id="chat-btn" onclick="chatOpen()" aria-label="お知らせ・チャット" title="お知らせ・チャット">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></svg>
+            <span class="chat-dot" aria-hidden="true"></span>
+        </button>
+        <button type="button" class="icon-btn" id="settings-btn" onclick="openSettings()" aria-label="設定" title="設定">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/></svg>
+        </button>
+    </div>
+    <nav class="app-nav" id="app-nav">
+        <button type="button" class="nav-btn active" data-screen="home" onclick="showScreen('home')">拠点</button>
+        <button type="button" class="nav-btn" data-screen="expedition" onclick="showScreen('expedition')">遠征</button>
+        <button type="button" class="nav-btn" data-screen="sortie" onclick="showScreen('sortie')">ルール編集</button>
+        <button type="button" class="nav-btn" data-screen="yard" onclick="showScreen('yard')">編成</button>
+        <button type="button" class="nav-btn" data-screen="enhance" onclick="showScreen('enhance')">強化</button>
+        <button type="button" class="nav-btn" data-screen="recruit" onclick="showScreen('recruit')">募集</button>
+    </nav>
+    <div class="app-header-tools" id="app-header-tools">
+        <span id="dev-ss-panel" style="display:none; align-items:center; gap:6px; flex-wrap:wrap; margin-left:8px; padding:4px 8px; border:1px dashed #b3261e; border-radius:6px;">
+            <span style="color:#b3261e; font-size:12px; font-weight:700;">DEV SS</span>
+            <input type="number" id="dev-ss-input" value="10000" min="1" step="1" style="width:7em; font-size:12px;">
+            <button type="button" class="btn btn-sm btn-blue" onclick="devAddSsFromInput()">追加</button>
+            <button type="button" class="btn btn-sm" onclick="devAddSs(100)">+100</button>
+            <button type="button" class="btn btn-sm" onclick="devAddSs(1000)">+1k</button>
+            <button type="button" class="btn btn-sm" onclick="devAddSs(10000)">+10k</button>
+            <button type="button" class="btn btn-sm" onclick="devSetSsFromInput()" title="所持SSを入力値に設定">設定</button>
+            <button type="button" class="btn btn-sm" onclick="devResetCooldown()" title="出撃のクールタイムを解除（開発用）">CT解除</button>
+            <span id="dev-ss-status" class="meta"></span>
+        </span>
+    </div>
+</header>
+
+<!-- ===== ホーム ===== -->
+
+
+<section id="screen-home" class="app-screen">
+    <div class="scene scene-home"><img src="img/bg/home-sm.webp" srcset="img/bg/home-sm.webp 800w, img/bg/home.webp 1600w" sizes="(max-width: 520px) 100vw, 520px" alt="" loading="lazy" decoding="async"><div class="scene-cap"><b>拠点</b><span>南方防衛ライン</span></div></div>
+    <div class="home-panel panel">
+        <div class="cloud-banner" id="cloud-banner">
+            <span>データを守るために Google と連携しましょう（ゲストのままだとブラウザのデータが消えると失われます）</span>
+            <span><button type="button" class="btn btn-sm btn-blue" onclick="cloudOpenPanel()">連携する</button>
+            <button type="button" class="btn btn-sm" onclick="cloudDismissBanner()">閉じる</button></span>
+        </div>
+        <div class="home-player" id="home-player"></div>
+        <button type="button" class="home-btn home-btn-primary" style="width:100%;margin-bottom:14px;" onclick="showScreen('expedition')">遠征<span class="home-ct" id="home-exp-ct"></span></button>
+        <button type="button" class="home-btn home-arena-btn" style="width:100%;margin-bottom:14px;" onclick="showScreen('arena')">闘技場<span class="home-ct">パーティAで自動参加</span></button>
+        <div class="mat">
+            <div class="mat-label" id="home-party-label">出撃編成</div>
+            <div class="mat-row" id="home-party-row"></div>
+            <div class="mat-hint">台座の数字は残りの寿命。タップでキャラ詳細（立ち絵の変更もここから）</div>
+        </div>
+        <div id="home-goals" class="goals"></div>
+        <div class="home-resource">
+            SS：<strong id="home-resource-value">0</strong>
+        </div>
+        <div class="home-actions">
+            <button type="button" class="home-btn" onclick="showScreen('sortie')">バトルルール編集</button>
+            <button type="button" class="home-btn" onclick="showScreen('yard')">パーティ編集</button>
+            <button type="button" class="home-btn" onclick="showScreen('enhance')">強化</button>
+            <button type="button" class="home-btn" onclick="showScreen('recruit')">募集</button>
+        </div>
+
+    </div>
+</section>
+
+<!-- ===== 出撃（バトルルール編集専用） ===== -->
+<section id="screen-sortie" class="app-screen" style="display:none;">
+    <div class="panel party-set-bar">
+        <span class="meta">対象パーティ</span>
+        <div class="party-set-tabs" data-party-tabs></div>
+    </div>
+    <div class="panel">
+        <h2>バトルルール編集　キャラクター選択</h2>
+        <div id="rule-who" class="rule-who"></div>
+    </div>
+    <div class="panel">
+        <h2 id="editor-title">ルールエディタ</h2>
+        <div class="hint">自分の番が来るたびに、上の行から順に見て、最初に当てはまった行を実行します。チェックを外した行は飛ばします。</div>
+        <div id="rule-editor"></div>
+    </div>
+</section>
+
+<!-- ===== 強化 ===== -->
+<section id="screen-enhance" class="app-screen" style="display:none;">
+    <div class="panel enhance-panel">
+        <div class="enhance-resource">
+            所持 SS：<strong id="enhance-resource-value">0</strong>
+        </div>
+        <div class="enhance-list">
+            <button type="button" class="enhance-item enhance-item-main" onclick="showScreen('train')">
+                <span class="enhance-title">キャラ育成（レベルアップ）</span>
+                <span class="enhance-desc">SS を使って、一覧からそのままレベルを上げる</span>
+            </button>
+            <button type="button" class="enhance-item locked" disabled>
+                <span class="enhance-title">クラスチェンジ</span>
+                <span class="enhance-desc">準備中（レベル上限の引き上げと一緒に解放する予定）</span>
+            </button>
+            <button type="button" class="enhance-item" onclick="showScreen('rule-unlock')">
+                <span class="enhance-title">ルール解放</span>
+                <span class="enhance-desc">条件・対象の確認とSS解放</span>
+            </button>
+            <button type="button" class="enhance-item" onclick="showScreen('accessory-inv')">
+                <span class="enhance-title">アクセサリー</span>
+                <span class="enhance-desc">解放・強化・所持確認（装備はキャラ詳細）</span>
+            </button>
+            <button type="button" class="enhance-item" onclick="showScreen('ad-shop')">
+                <span class="enhance-title">祈りの欠片</span>
+                <span class="enhance-desc">冒険者名の変更や、ヤード枠などの便利機能に使うポイント</span>
+            </button>
+            <button type="button" class="enhance-item" onclick="showScreen('sortie')">
+                <span class="enhance-title">バトルルール編集</span>
+                <span class="enhance-desc">キャラごとの行動ルールを編集</span>
+            </button>
+        </div>
+        <p class="hint">キャラの成長、ルールの解放、アクセサリーの購入と強化に SS を使います。</p>
+    </div>
+</section>
+
+<!-- ===== ヤード（パーティ組み換え専用） ===== -->
+<section id="screen-yard" class="app-screen" style="display:none;">
+    <div class="panel party-set-bar">
+        <span class="meta">パーティ</span>
+        <div class="party-set-tabs" data-party-tabs></div>
+        <button class="btn btn-sm" onclick="promptRenamePartySet()">名前変更</button>
+    </div>
+    <div class="panel">
+        <h2>パーティ編集　編成中（出撃 1〜4） <span class="meta" id="party-count"></span></h2>
+        <div class="hint">先頭から順に出撃します。↑↓で並べ替え。</div>
+        <div class="hint ar-party-note"><b>パーティA</b>の編成とバトルルールは、闘技場（PVP）にも使われます（締切の時点の設定で自動参加）。</div>
+        <div id="yard-party"></div>
+    </div>
+    <div class="panel yard-list-panel">
+        <h2>ヤード <span class="meta" id="yard-count"></span></h2>
+        <div class="party-bar">
+            <select id="add-yard-class" class="cls-add"></select>
+            <button class="btn btn-sm btn-blue" onclick="addToYard()">追加</button>
+        </div>
+        <div class="yard-filters">
+            <select id="yard-filter" onchange="renderYardScreen()">
+                <option value="all">すべて</option>
+                <option value="warrior">戦士系</option>
+                <option value="mage">魔法系</option>
+                <option value="cleric">回復系</option>
+                <option value="enchanter">支援系</option>
+            </select>
+            <select id="yard-sort" onchange="renderYardScreen()">
+                <option value="name">名前順</option>
+                <option value="level">Lv順</option>
+                <option value="class">クラス順</option>
+            </select>
+        </div>
+        <div id="yard-list"></div>
+    </div>
+    <div class="panel">
+        <details>
+            <summary>引退したキャラ <span class="meta" id="retired-count"></span></summary>
+            <div class="hint" style="margin:6px 0;">引退したキャラは、SSを抜き出すとヤードから完全に消えます（枠が空きます）。</div>
+            <div id="retired-list"></div>
+        </details>
+    </div>
+</section>
+
+
+<!-- ===== 募集 ===== -->
+<section id="screen-recruit" class="app-screen" style="display:none;">
+    <div class="scene scene-recruit"><img src="img/bg/recruit-sm.webp" srcset="img/bg/recruit-sm.webp 800w, img/bg/recruit.webp 1600w" sizes="(max-width: 520px) 100vw, 520px" alt="" loading="lazy" decoding="async"><div class="scene-cap"><b>募集</b><span>冒険者ギルドの掲示板</span></div></div>
+    <div class="recruit-wrap">
+        <div class="panel recruit-ctrl">
+            <div class="recruit-ctrl-row">
+                <div class="recruit-kind">
+                    <div class="recruit-kind-title">無料募集</div>
+                    <div class="meta" id="recruit-rate-free"></div>
+                    <button type="button" class="btn" id="recruit-btn-free" onclick="recruitDraw('free')">無料で募集</button>
+                </div>
+                <div class="recruit-kind">
+                    <div class="recruit-kind-title">有料募集 <span class="meta" id="recruit-cost-label"></span></div>
+                    <div class="meta" id="recruit-rate-paid"></div>
+                    <button type="button" class="btn recruit-paid-btn" id="recruit-btn-paid" onclick="recruitDraw('paid')">SSで募集</button>
+                </div>
+            </div>
+            <p class="hint">候補は 5 人表示されます。気に入った 1 人を選んで加入させます（加入しなかった候補は破棄されます）。<br>
+            ボーナス対象は HP / ATK / DEF / INT / MND / AGI / DEX から均等ランダム。UR は「初期値ボーナス」と「成長率 +0.1」の 2 つを別々に抽選します。</p>
+        </div>
+        <div class="panel" id="recruit-panel-free">
+            <h2>無料募集の候補</h2>
+            <div id="recruit-cands-free" class="recruit-cands"></div>
+        </div>
+        <div class="panel" id="recruit-panel-paid">
+            <h2>有料募集の候補</h2>
+            <div id="recruit-cands-paid" class="recruit-cands"></div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== 遠征（Phase1 確認用：戦闘→事後回復→撤退判定のループ） ===== -->
+<section id="screen-expedition" class="app-screen" style="display:none;">
+    <div class="scene" id="exp-scene"><img id="exp-scene-img" alt="" loading="lazy" decoding="async" sizes="(max-width: 520px) 100vw, 520px"><div class="scene-cap"><b id="exp-scene-title"></b><span id="exp-scene-sub"></span></div></div>
+    <div class="exp-wrap exp-two-col">
+        <div class="panel exp-settings">
+            <h2>遠征</h2>
+            <div class="exp-grid">
+                <label>ダンジョン<select id="exp-dungeon" onchange="onExpDungeonChange()"></select></label>
+                <label>ステージ<select id="exp-stage" onchange="renderExpInfo()"></select></label>
+                <label>モード<select id="exp-mode" onchange="renderExpInfo()"></select></label>
+                <label>撤退プロトコル<select id="exp-proto" onchange="onExpProtoChange()"></select></label>
+                <label>値<input type="number" id="exp-proto-val" value="1" onchange="renderExpInfo()"><span id="exp-proto-unit" class="meta"></span></label>
+            </div>
+            <div id="exp-info" class="hint"></div>
+            <div class="exp-actions">
+                <button type="button" class="btn" id="exp-run" onclick="onExpRun()">出撃</button>
+                <button type="button" class="btn" id="exp-run10" onclick="onExpRun10()">10連出撃</button>
+                <button type="button" class="btn btn-danger" id="exp-cancel" style="display:none;" onclick="cancelBatch()">中断</button>
+                <label class="meta exp-dry-label"><input type="checkbox" id="exp-dry" checked onchange="expUpdateRunButtons()"> テスト実行（SS・寿命・待ち時間なし）</label>
+                <button type="button" class="btn btn-blue" onclick="copyExpText()">全文ログをコピー</button>
+            </div>
+            <details class="dc-box">
+                <summary>Discord 通知設定</summary>
+                <div class="dc-grid">
+                    <label>Webhook URL
+                        <span class="dc-url-row"><input type="password" id="dc-url" autocomplete="off" spellcheck="false" placeholder="https://discord.com/api/webhooks/…" onchange="onDiscordSettingsChange()">
+                        <button type="button" class="btn btn-sm" onclick="toggleDiscordUrlVisible()">表示</button></span>
+                    </label>
+                    <label class="chk"><input type="checkbox" id="dc-batch" onchange="onDiscordSettingsChange()"> 10連出撃の完了時に通知（全滅があれば赤・なければ青）</label>
+                    <label class="chk"><input type="checkbox" id="dc-wipe" onchange="onDiscordSettingsChange()"> 全滅時に通知（赤）</label>
+                    <div><button type="button" class="btn btn-sm btn-blue" onclick="onDiscordTest()">テスト送信</button> <span id="dc-status" class="meta"></span></div>
+                    <div class="hint">URL はこのブラウザにのみ保存され、セーブ/エクスポートには含まれません。通知にはサマリーとログファイル(.txt)が添付されます。10連中の全滅通知は最大3件まで。</div>
+                </div>
+            </details>
+            <div id="exp-ct" class="hint exp-ct"></div>
+            <div class="hint">出撃メンバーは「パーティ編集」で選んだパーティ。HP・スキル使用回数は連戦中ずっと持ち越し、戦闘後にヒール系を自動使用します。</div>
+        </div>
+        <div class="panel exp-log-panel">
+            <h2>遠征の記録</h2>
+            <div id="exp-summary" class="exp-summary"></div>
+            <div id="exp-batch"></div>
+            <div class="exp-speedbar">
+                <span class="meta">表示</span><span id="exp-view" class="exp-speed"></span>
+                <span class="meta">速さ</span><span id="exp-speed" class="exp-speed"></span>
+                <button type="button" class="btn btn-sm" id="exp-skip" style="display:none;" onclick="flushLog()">結果まで飛ばす</button>
+                <span id="exp-log-progress" class="meta"></span>
+            </div>
+            <div id="exp-log" class="log-box exp-log">出撃するとここに遠征ログが出ます</div>
+            <textarea id="exp-copy" readonly style="position:absolute;left:-9999px;"></textarea>
+        </div>
+    </div>
+</section>
+
+
+<!-- ===== キャラ育成（P9.13.1） ===== -->
+<section id="screen-train" class="app-screen" style="display:none;">
+    <div class="panel unlock-panel">
+        <h2>キャラ育成</h2>
+        <p class="hint">SS を使ってレベルを上げます。出撃中のキャラが上に並びます。所持 SS：<strong id="train-ss">0</strong></p>
+        <div id="train-list" class="train-list"></div>
+        <button type="button" class="btn btn-sm" style="margin-top:12px;" onclick="showScreen('enhance')">強化へ戻る</button>
+    </div>
+</section>
+
+<!-- ===== アクセサリー解放・強化（P9.4.4） ===== -->
+<section id="screen-accessory-inv" class="app-screen" style="display:none;">
+    <div class="panel unlock-panel">
+        <h2>アクセサリー</h2>
+        <p class="hint">同じアクセサリーを複数持っているときは <b>#1・#2</b> の番号で区別します。強化は1つずつ、装備は「装備する」でキャラを選びます（キャラ詳細の「装備」タブからも付けられます）。所持 SS：<strong id="accessory-inv-ss">0</strong></p>
+        <div id="accessory-inv-list"></div>
+        <button type="button" class="btn btn-sm" style="margin-top:12px;" onclick="showScreen('enhance')">強化へ戻る</button>
+    </div>
+</section>
+
+<!-- ===== 闘技場（常設PVP・P9.17.0） ===== -->
+<section id="screen-arena" class="app-screen" style="display:none;">
+    <div class="scene scene-arena"><img src="img/bg/arena-sm.webp" srcset="img/bg/arena-sm.webp 800w, img/bg/arena.webp 1600w" sizes="(max-width: 520px) 100vw, 520px" alt="" loading="lazy" decoding="async"><div class="scene-cap"><b>闘技場</b><span>冒険者たちの決闘場</span></div></div>
+    <div class="panel arena-panel">
+        <h2>闘技場</h2>
+        <div id="arena-body"></div>
+    </div>
+</section>
+
+<!-- ===== お知らせ・定型チャット（P9.16.0） ===== -->
+<section id="screen-chat" class="app-screen" style="display:none;">
+    <div class="panel chat-panel">
+        <div class="chat-tabs" id="chat-tabs"></div>
+        <div id="chat-notice-pane" class="chat-notices"></div>
+        <div id="chat-chat-pane" style="display:none;">
+            <div id="chat-list" class="chat-list"></div>
+            <div id="chat-composer" class="chat-composer"></div>
+            <p class="hint">発言は定型文だけです。名前を押すと、その人の発言をこの端末で非表示にできます。発言は7日で消えます。</p>
+        </div>
+    </div>
+</section>
+
+<!-- ===== 祈りの欠片（広告ポイント） ===== -->
+<section id="screen-ad-shop" class="app-screen" style="display:none;">
+    <div class="panel unlock-panel">
+        <h2>祈りの欠片</h2>
+        <p class="hint">広告を見ると受け取れるポイントです。キャラの強さや SS には関係せず、便利機能と装飾にだけ使います。</p>
+        <div id="ad-shop-body"></div>
+        <button type="button" class="btn btn-sm" style="margin-top:12px;" onclick="showScreen('enhance')">強化へ戻る</button>
+    </div>
+</section>
+
+<!-- ===== ルール解放（P9.4.4） ===== -->
+<section id="screen-rule-unlock" class="app-screen" style="display:none;">
+    <div class="panel unlock-panel">
+        <h2>ルール解放</h2>
+        <p class="hint">条件・対象の解放はアカウント全体で永続利用。所持 SS：<strong id="rule-unlock-ss">0</strong></p>
+        <div id="rule-unlock-list"></div>
+        <button type="button" class="btn btn-sm" style="margin-top:12px;" onclick="showScreen('enhance')">強化へ戻る</button>
+    </div>
+</section>
+
+<!-- ===== 設定 ===== -->
+<div id="settings-overlay" class="cloud-overlay" onclick="if (event.target === this) closeSettings()">
+    <div class="panel cloud-dialog settings-dialog" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+        <h2 id="settings-title">設定</h2>
+        <h3>言語<span class="lang-sub" data-no-i18n> / Language</span></h3>
+        <div class="settings-lang" data-no-i18n>
+            <button type="button" class="btn btn-sm" id="lang-ja" onclick="i18nSetLang('ja')">日本語</button>
+            <button type="button" class="btn btn-sm" id="lang-en" onclick="i18nSetLang('en')">English</button>
+        </div>
+        <h3>演出</h3>
+        <div id="settings-fx"></div>
+        <h3>データ</h3>
+        <div class="meta" id="storage-status">—</div>
+        <div class="settings-btns">
+            <button type="button" class="btn btn-sm btn-blue" onclick="exportSaveJSON()">データを書き出す（JSON）</button>
+            <span class="settings-local">
+                <button type="button" class="btn btn-sm btn-blue" onclick="saveToStorage(); alert('保存しました');">保存</button>
+                <label class="btn btn-sm btn-blue" style="margin:0;cursor:pointer;">JSON読込
+                    <input type="file" accept="application/json,.json" style="display:none" onchange="importSaveJSON(this.files[0]); this.value='';">
+                </label>
+                <button type="button" class="btn btn-sm btn-danger" onclick="clearStorage()">初期化</button>
+            </span>
+        </div>
+        <p class="hint settings-server-note">データはサーバーに保存されています。書き出したJSONは確認用です。</p>
+        <h3>アカウント</h3>
+        <button type="button" class="btn btn-sm btn-blue" onclick="closeSettings(); cloudOpenPanel();">クラウド連携・ログイン</button>
+        <h3>このアプリについて</h3>
+        <div class="meta">サザン・ヴェイル　<span id="settings-version"></span></div>
+        <div class="settings-links"><a href="terms.html" target="_blank" rel="noopener">利用規約</a>　<a href="privacy.html" target="_blank" rel="noopener">プライバシーポリシー</a></div>
+        <div class="settings-close"><button type="button" class="btn" onclick="closeSettings()">閉じる</button></div>
+    </div>
+</div>
+
+<script src="js/i18n-en.js?v=P9.21.1"></script>
+<script src="js/i18n.js?v=P9.21.1"></script>
+<script src="js/common.js?v=P9.21.1"></script>
+<script src="js/standee.js?v=P9.21.1"></script>
+<script src="js/fx.js?v=P9.21.1"></script>
+<script src="js/data.js?v=P9.21.1"></script>
+<script src="js/model.js?v=P9.21.1"></script>
+<script src="js/storage.js?v=P9.21.1"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="js/cloud-config.js?v=P9.21.1"></script>
+<script src="js/title.js?v=P9.21.1"></script>
+<script src="js/cloud.js?v=P9.21.1"></script>
+<script src="js/recruit.js?v=P9.21.1"></script>
+<script src="js/engine.js?v=P9.21.1"></script>
+<script src="js/expedition.js?v=P9.21.1"></script>
+<script src="js/batch.js?v=P9.21.1"></script>
+<script src="js/ads.js?v=P9.21.1"></script>
+<script src="js/ui.js?v=P9.21.1"></script>
+<script src="js/batch-ui.js?v=P9.21.1"></script>
+<script src="js/server.js?v=P9.21.1"></script>
+<script src="js/chat.js?v=P9.21.1"></script>
+<script src="js/arena.js?v=P9.21.1"></script>
+<script src="js/cloud-ui.js?v=P9.21.1"></script>
+</body>
+</html>

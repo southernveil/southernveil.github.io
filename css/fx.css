@@ -1,0 +1,120 @@
+/* ===== P9.13.0 報酬演出（js/fx.js） ===== */
+.fx-overlay{position:fixed;inset:0;z-index:3000;display:none;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;background:rgba(29,27,23,0);transition:background .25s ease;}
+.fx-overlay.fx-in{background:rgba(29,27,23,.58);}
+.fx-card{position:relative;width:100%;max-width:360px;max-height:calc(100vh - 32px);overflow:auto;box-sizing:border-box;padding:26px 18px 16px;text-align:center;color:var(--ink,#1d1b17);
+  background:radial-gradient(ellipse at 50% 0%,#fbf7ec 0%,var(--panel,#f6f1e4) 55%,#eee6d2 100%);
+  border:2px solid var(--ink,#1d1b17);box-shadow:0 18px 40px rgba(20,14,4,.45),inset 0 0 0 4px var(--panel,#f6f1e4),inset 0 0 0 5px rgba(29,27,23,.22);
+  transform:translateY(28px) scale(.96);opacity:0;transition:transform .34s cubic-bezier(.2,.9,.25,1.15),opacity .22s ease;}
+.fx-in .fx-card{transform:none;opacity:1;}
+.fx-card.fx-lite{transition:none;transform:none;opacity:1;}
+.fx-card-gold{border-color:#8a6d12;box-shadow:0 0 0 3px rgba(201,166,78,.45),0 18px 44px rgba(90,64,8,.5),inset 0 0 0 4px var(--panel,#f6f1e4),inset 0 0 0 5px rgba(138,109,18,.45);}
+.fx-card > *{position:relative;z-index:1;}
+.fx-eyebrow{font-size:11px;letter-spacing:.3em;color:var(--stamp,#b3261e);font-weight:700;}
+.fx-card-ink .fx-eyebrow{color:var(--muted,#5f5849);}
+.fx-card-gold .fx-eyebrow{color:#8a6d12;}
+.fx-title{font-family:var(--serif,serif);font-weight:900;font-size:22px;letter-spacing:.05em;margin:6px 40px 2px;line-height:1.35;word-break:break-word;}
+.fx-big{font-size:28px;color:var(--stamp,#b3261e);}
+.fx-sub{font-size:12px;color:var(--muted,#5f5849);}
+.fx-figure{display:flex;justify-content:center;align-items:flex-end;min-height:64px;margin:12px 0 6px;}
+.fx-icon{color:var(--stamp,#b3261e);}
+.fx-card-ink .fx-icon{color:var(--ink,#1d1b17);}
+.fx-acc .fx-acc-icon{width:64px;height:64px;}
+.fx-count{display:flex;align-items:baseline;justify-content:center;gap:6px;margin:8px 0 4px;}
+.fx-count-label{font-size:12px;color:var(--muted,#5f5849);}
+.fx-count-num{font-family:var(--mono,monospace);font-size:40px;font-weight:500;line-height:1;}
+.fx-count-unit{font-family:var(--mono,monospace);font-size:14px;}
+.fx-body{font-size:13px;line-height:1.7;margin-top:8px;text-align:left;}
+.fx-body p{margin:4px 0;}
+.fx-note{color:var(--muted,#5f5849);font-size:12px;}
+.fx-warn{color:var(--stamp,#b3261e);font-weight:700;}
+.fx-cost{font-family:var(--mono,monospace);color:var(--muted,#5f5849);text-align:right;}
+.fx-list{margin:4px 0;padding-left:18px;}
+.fx-items{list-style:none;padding:0;margin:6px 0;display:flex;flex-direction:column;gap:6px;}
+.fx-items li{display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--line,#bdb299);background:rgba(255,255,255,.4);}
+.fx-items em{margin-left:auto;font-style:normal;font-family:var(--mono,monospace);font-size:11px;color:var(--stamp,#b3261e);border:1px solid var(--stamp,#b3261e);padding:0 5px;}
+.fx-acc-icon{color:var(--stamp,#b3261e);flex:none;}
+.fx-stats{display:flex;flex-wrap:wrap;gap:2px 10px;justify-content:center;font-family:var(--mono,monospace);font-size:12px;}
+.fx-stat b{color:var(--stamp,#b3261e);font-weight:500;margin-left:2px;}
+.fx-bonus{color:#8a6d12;font-weight:700;text-align:center;}
+.fx-actions{display:flex;gap:8px;justify-content:center;margin-top:16px;}
+.fx-actions .btn{min-height:44px;padding:8px 18px;}
+.fx-ok{min-width:128px;}
+
+/* 朱印 */
+.fx-stamp{position:absolute !important;right:12px;top:12px;width:70px;height:70px;border-radius:50%;border:3px solid currentColor;color:var(--stamp,#b3261e);
+  display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 3px rgba(246,241,228,.9),inset 0 0 0 5px currentColor;
+  transform:rotate(-14deg) scale(2.6);opacity:0;pointer-events:none;z-index:2 !important;mix-blend-mode:multiply;}
+.fx-stamp span{font-family:var(--serif,serif);font-weight:900;font-size:20px;letter-spacing:.02em;}
+.fx-stamp-ink{color:#2e2a22;}
+.fx-stamp.on{animation:fxStampIn .26s cubic-bezier(.3,1.5,.55,1) forwards;}
+.fx-lite .fx-stamp.on{animation:none;transform:rotate(-14deg);opacity:.9;}
+@keyframes fxStampIn{0%{transform:rotate(-14deg) scale(2.6);opacity:0}70%{transform:rotate(-14deg) scale(.92);opacity:.95}100%{transform:rotate(-14deg) scale(1);opacity:.9}}
+.fx-thud{animation:fxThud .22s ease-out;}
+@keyframes fxThud{0%{transform:none}30%{transform:translate(1px,2px) rotate(.3deg)}60%{transform:translate(-1px,-1px)}100%{transform:none}}
+
+/* 光芒（初踏破・レア以上の加入など） */
+.fx-rays{position:absolute !important;left:50%;top:110px;width:360px;height:360px;margin:-180px 0 0 -180px;border-radius:50%;pointer-events:none;z-index:0 !important;
+  background:repeating-conic-gradient(from 0deg,rgba(179,38,30,.13) 0deg 8deg,transparent 8deg 20deg);
+  -webkit-mask-image:radial-gradient(circle,#000 18%,transparent 68%);mask-image:radial-gradient(circle,#000 18%,transparent 68%);animation:fxSpin 16s linear infinite;}
+.fx-card-gold .fx-rays{background:repeating-conic-gradient(from 0deg,rgba(201,166,78,.32) 0deg 8deg,transparent 8deg 20deg);}
+@keyframes fxSpin{to{transform:rotate(360deg)}}
+
+/* 駒の動き */
+.fx-in .fx-rise .stand{animation:fxRise .6s cubic-bezier(.2,1.25,.4,1) .12s both;}
+@keyframes fxRise{0%{transform:translateY(46px) scale(.7);opacity:0}100%{transform:none;opacity:1}}
+.fx-in .fx-hop .stand{animation:fxHop .75s ease-out .2s both;}
+.fx-jump{animation:fxHop .75s ease-out;}
+@keyframes fxHop{0%{transform:translateY(0)}30%{transform:translateY(-18px)}55%{transform:translateY(0)}72%{transform:translateY(-6px)}100%{transform:translateY(0)}}
+.fx-standees{display:flex;gap:8px;justify-content:center;align-items:flex-end;flex-wrap:wrap;}
+.fx-standees.fallen .stand,.fx-toast-fig.fallen .stand{filter:grayscale(1) sepia(.15);opacity:.8;}
+
+/* トースト */
+.fx-toasts{position:fixed;left:50%;bottom:calc(74px + env(safe-area-inset-bottom, 0px));transform:translateX(-50%);z-index:3100;display:flex;flex-direction:column;gap:6px;width:min(360px,calc(100% - 24px));pointer-events:none;}
+.fx-toast{pointer-events:auto;display:flex;align-items:center;gap:10px;padding:8px 12px;box-sizing:border-box;background:var(--panel,#f6f1e4);color:var(--ink,#1d1b17);
+  border:1px solid var(--ink,#1d1b17);border-left:5px solid var(--stamp,#b3261e);box-shadow:0 6px 16px rgba(20,14,4,.28);font-size:12px;line-height:1.5;
+  transform:translateY(14px);opacity:0;transition:transform .25s ease,opacity .25s ease;cursor:pointer;}
+.fx-toast.show{transform:none;opacity:1;}
+.fx-toast-main > b{display:block;font-family:var(--serif,serif);font-size:14px;}
+.fx-toast .fx-stat b{font-family:var(--mono,monospace);font-size:12px;}
+.fx-lv{font-family:var(--serif,serif);font-size:16px;color:var(--ink,#1d1b17);}
+.fx-toast-main{display:flex;flex-direction:column;min-width:0;}
+.fx-toast-main > span{color:var(--muted,#5f5849);}
+.fx-toast .fx-stats{justify-content:flex-start;color:var(--ink,#1d1b17);}
+.fx-toast-fig{flex:none;}
+.fx-tone-ink{border-left-color:var(--ink,#1d1b17);}
+.fx-tone-gold{border-left-color:#c9a64e;}
+
+/* 浮かぶ数字（SSが増えたとき） */
+.fx-float{position:absolute;transform:translate(-50%,-4px);font-family:var(--mono,monospace);font-weight:500;font-size:16px;color:var(--stamp,#b3261e);pointer-events:none;z-index:3200;animation:fxFloat 1.2s ease-out forwards;text-shadow:0 1px 0 #fff;}
+@keyframes fxFloat{0%{opacity:0;transform:translate(-50%,6px)}15%{opacity:1}100%{opacity:0;transform:translate(-50%,-34px)}}
+
+/* 設定 */
+.fx-settings{display:flex;flex-direction:column;gap:10px;}
+.fx-switch{display:flex;gap:8px;align-items:center;font-size:13px;}
+.fx-switch input{width:18px;height:18px;}
+
+@media (prefers-reduced-motion: reduce){
+  .fx-card,.fx-toast{transition:none;}
+  .fx-rays{animation:none;}
+  .fx-stamp.on{animation:none;transform:rotate(-14deg);opacity:.9;}
+  .fx-in .fx-rise .stand,.fx-in .fx-hop .stand,.fx-jump,.fx-thud,.fx-float{animation:none;}
+}
+
+/* 募集の候補が並ぶとき */
+.cands-reveal .cand-card{animation:candIn .5s cubic-bezier(.2,1.2,.4,1) both;animation-delay:calc(var(--i, 0) * 90ms);}
+.cands-reveal .cand-card.cand-rare,.cands-reveal .cand-card.cand-ur{animation:candIn .5s cubic-bezier(.2,1.2,.4,1) both,candGlow 1.2s ease-out both;animation-delay:calc(var(--i, 0) * 90ms),calc(var(--i, 0) * 90ms + .35s);}
+@keyframes candIn{0%{transform:translateY(24px) scale(.94);opacity:0}100%{transform:none;opacity:1}}
+@keyframes candGlow{0%{box-shadow:0 0 0 0 rgba(201,166,78,.9)}100%{box-shadow:0 0 0 14px rgba(201,166,78,0)}}
+@media (prefers-reduced-motion: reduce){ .cands-reveal .cand-card{animation:none !important;} }
+
+/* ポートレートの切り抜き */
+.crop-overlay{position:fixed;inset:0;z-index:3300;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(29,27,23,.6);}
+.crop-card{background:var(--panel,#f6f1e4);border:2px solid var(--ink,#1d1b17);padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px;max-width:340px;width:100%;box-sizing:border-box;}
+.crop-title{font-family:var(--serif,serif);font-weight:900;font-size:17px;}
+.crop-frame{position:relative;overflow:hidden;border-radius:100px 100px 10px 10px;border:4px solid #fff;box-shadow:0 0 0 1px rgba(29,27,23,.5),4px 8px 12px rgba(40,30,10,.35);background:#d6ccb4;touch-action:none;cursor:grab;}
+.crop-frame:active{cursor:grabbing;}
+.crop-img{position:absolute;max-width:none;user-select:none;-webkit-user-drag:none;pointer-events:none;}
+.crop-zoom{display:flex;align-items:center;gap:8px;font-size:12px;width:100%;}
+.crop-zoom input{flex:1;}
+.crop-note{font-size:11px;color:var(--muted,#5f5849);text-align:center;}
+.crop-actions{display:flex;gap:8px;}

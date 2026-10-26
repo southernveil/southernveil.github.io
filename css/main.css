@@ -1,0 +1,251 @@
+body { font-family: sans-serif; background: #ece6d8; color: #1d1b17; margin: 0; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+        h2 { margin: 0 0 8px 0; color: #1d1b17; font-size: 14px; }
+        .panel { background: #f6f1e4; padding: 12px; border-radius: 8px; border: 1px solid #9a917b; }
+        .main-container { display: flex; gap: 12px; height: calc(100vh - 78px); min-height: 520px; }
+        .pane-left { flex: 0.9; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
+        .pane-center { flex: 1.4; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
+        .pane-right { flex: 1.9; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+        .char-card { background: #e2dac6; padding: 8px 10px; border-radius: 5px; border-left: 4px solid #8a826f; font-size: 11px; cursor: pointer; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; }
+        .char-card.player { border-color: #1d1b17; }
+        .char-card.enemy { border-color: #b3261e; }
+        .char-card.selected { background: #9a917b; box-shadow: 0 0 5px #1d1b17; border-left-width: 8px; }
+        .char-card-name { font-weight: bold; font-size: 12px; }
+        .tab-container { display: flex; gap: 5px; margin-bottom: 8px; }
+        .tab-btn { background: #e2dac6; color: #5f5849; border: 1px solid #8a826f; padding: 5px 10px; font-size: 11px; cursor: pointer; border-radius: 4px; flex: 1; text-align: center; }
+        .tab-btn.active { background: #2f4a85; color: white; border-color: #2f4a85; font-weight: bold; }
+        .editor-header { display: flex; gap: 8px; font-weight: bold; font-size: 12px; color: #5f5849; padding: 0 5px 5px 35px; border-bottom: 1px solid #9a917b; margin-bottom: 8px; text-align: center; }
+        .editor-header span { flex: 1; }
+        .rule-row { background: #efe9d9; padding: 8px; margin-bottom: 6px; border-radius: 5px; display: flex; align-items: center; gap: 8px; border: 1px solid #9a917b; }
+        .rule-row select { background: #e2dac6; color: #1d1b17; border: 1px solid #8a826f; padding: 4px; border-radius: 4px; font-size: 12px; flex: 1; min-width: 0; }
+        .fallback-row { background: #e9e2d0; border: 1px dashed #8a826f; color: #5f5849; }
+        .btn { background: #1d1b17; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 13px; }
+        .btn:hover { background: #3a362e; }
+        .btn-blue { background: #2f4a85; font-size: 12px; padding: 6px 10px; }
+        .log-box { background: #e9e2d0; font-family: monospace; padding: 10px; flex: 1; overflow-y: auto; border-radius: 5px; font-size: 12px; line-height: 1.4; color: #2e2a22; }
+        .log-round { color: #8a6d12; margin-top: 10px; font-weight: bold; border-bottom: 1px solid #8a826f; padding-bottom: 2px; }
+        .log-action { color: #1d1b17; }
+        .log-enemy { color: #b3261e; }
+        .log-counter { color: #8a6d12; font-weight: bold; }
+        .log-status { color: #2f4a85; }
+        .log-dot { color: #6b4a85; }
+        .debug-unit { color: #2f4a85; font-weight: bold; margin-top: 12px; border-bottom: 1px solid #e2dac6; padding-bottom: 2px; }
+        .debug-rule { margin: 4px 0 4px 6px; padding: 6px 8px; background: #efe9d9; border-left: 3px solid #8a826f; border-radius: 4px; font-size: 11px; }
+        .debug-rule .rtitle { color: #b3261e; font-weight: bold; }
+        .debug-rule .result-ok { color: #2e6b3a; }
+        .debug-rule .result-ng { color: #b3261e; }
+        .debug-fallback { color: #a8452f; font-weight: bold; margin: 6px 0 6px 6px; font-size: 11.5px; }
+        .debug-note { color: #6b4a85; margin: 4px 0 4px 6px; font-size: 11px; }
+        .log-header { color: #2f4a85; font-weight: bold; font-size: 12px; padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1px solid #a89d84; }
+        .hint { font-size: 10px; color: #5f5849; line-height: 1.5; margin-bottom: 8px; }
+        textarea#md-output { width: 100%; height: 90px; background: #e9e2d0; color: #1d1b17; border: 1px solid #9a917b; font-family: monospace; font-size: 11px; padding: 8px; box-sizing: border-box; resize: none; margin-top: 5px; }
+        @media (max-width: 900px) {
+            .main-container { flex-direction: column; height: auto; }
+            .pane-left, .pane-center, .pane-right { min-height: 280px; }
+        }
+
+/* P7-6b layout helpers */
+.meta { font-size: 10px; color: #5f5849; }
+.party-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px; }
+select.cls-add { background: #e2dac6; color: #1d1b17; border: 1px solid #8a826f; padding: 4px; border-radius: 4px; font-size: 12px; }
+.btn-sm { font-size: 11px; padding: 4px 8px; margin: 2px; }
+.btn-danger { background: #b3261e; }
+.hint { font-size: 10px; color: #5f5849; line-height: 1.5; margin-bottom: 8px; }
+
+.stat-line { font-size: 11px; color: #5f5849; line-height: 1.45; margin-top: 2px; font-family: 'IBM Plex Mono', monospace; }
+
+.char-card input[type=number] { font-size: 12px; }
+
+/* P8.2.1 character detail */
+.detail-top { margin: 0 0 8px; padding: 12px 16px; }
+.detail-layout { max-width: 820px; margin: 0 auto 24px; padding: 0 12px; }
+.detail-header { margin-bottom: 10px; }
+.detail-name { font-size: 22px; font-weight: 700; }
+.detail-sub { margin-top: 6px; display: flex; gap: 12px; flex-wrap: wrap; color: #5f5849; font-size: 14px; }
+.detail-tab-panel { padding: 12px 4px 8px; }
+.detail-tab-panel h3 { font-size: 13px; color: #2f4a85; margin: 14px 0 8px; letter-spacing: 0.06em; }
+.stat-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.stat-table th, .stat-table td { border-bottom: 1px solid #bdb299; padding: 6px 8px; text-align: left; }
+.stat-table th { color: #5f5849; font-weight: 600; }
+.class-history { padding: 8px 0; }
+.hist-node { padding: 6px 10px; border-left: 3px solid #2f4a85; margin: 4px 0; background: #f1ebdb; }
+.action-list { list-style: none; padding: 0; }
+.action-list li { padding: 6px 8px; border-bottom: 1px solid #bdb299; font-size: 13px; }
+.cc-mock { margin-top: 8px; }
+.cc-cards { display: flex; gap: 12px; flex-wrap: wrap; }
+.cc-card { flex: 1; min-width: 160px; border: 1px solid #bdb299; border-radius: 8px; padding: 12px; background: #f1ebdb; }
+.cc-card-title { font-weight: 700; font-size: 15px; }
+.cc-card-path { color: #b3261e; font-size: 12px; margin: 4px 0 8px; }
+.cc-card ul { margin: 0; padding-left: 18px; font-size: 12px; color: #2e2a22; }
+.equip-slot { display: flex; gap: 12px; align-items: center; padding: 10px; background: #f1ebdb; border-radius: 6px; border: 1px dashed #bdb299; }
+.equip-label { color: #5f5849; font-size: 12px; min-width: 80px; }
+.equip-value { font-size: 14px; }
+a.btn { text-decoration: none; display: inline-block; line-height: normal; }
+
+
+/* ===== P8.3 UI骨格 ===== */
+.app-header { padding: 10px 12px; margin: 0; border-radius: 0; border-left: none; border-right: none; border-top: none; }
+.app-header-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.app-brand { font-weight: 700; font-size: 16px; letter-spacing: 0.04em; }
+.resource-badge {
+    background: #efe6d0; border: 1px solid #b7a98a; border-radius: 8px;
+    padding: 6px 12px; display: flex; flex-direction: column; align-items: flex-end; min-width: 100px;
+}
+.resource-label { font-size: 10px; color: #5f5849; letter-spacing: 0.08em; }
+.resource-value { font-size: 18px; font-weight: 700; color: #b3261e; font-family: 'IBM Plex Mono', monospace; }
+.app-nav { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.nav-btn {
+    flex: 1; min-width: 72px; min-height: 40px; padding: 8px 10px;
+    background: #f1ebdb; color: #2e2a22; border: 1px solid #bdb299; border-radius: 8px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.nav-btn.active { background: #e2d3b3; border-color: #2f4a85; color: #1d1b17; }
+.app-header-tools { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+.app-screen { padding: 8px 0 24px; }
+.home-panel { max-width: 420px; margin: 24px auto; padding: 24px 20px; }
+.home-resource { text-align: center; font-size: 18px; margin-bottom: 24px; }
+.home-resource strong { color: #b3261e; font-size: 28px; font-family: 'IBM Plex Mono', monospace; }
+.home-actions { display: flex; flex-direction: column; gap: 12px; }
+.home-btn {
+    min-height: 52px; font-size: 18px; font-weight: 700;
+    background: #e2d3b3; color: #1d1b17; border: 1px solid #2f4a85; border-radius: 12px; cursor: pointer;
+}
+.home-btn:active { background: #d8c79f; }
+.party-set-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 12px; margin: 0 0 8px; }
+.party-set-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.party-set-tab {
+    min-height: 36px; padding: 6px 12px; border-radius: 8px; border: 1px solid #bdb299;
+    background: #f1ebdb; color: #2e2a22; cursor: pointer; font-size: 13px;
+}
+.party-set-tab.active { background: #e2d3b3; border-color: #2f4a85; color: #1d1b17; }
+.enhance-panel { max-width: 480px; margin: 12px auto; padding: 16px; }
+.enhance-resource { font-size: 16px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #bdb299; }
+.enhance-resource strong { color: #b3261e; font-size: 22px; font-family: 'IBM Plex Mono', monospace; }
+.enhance-list { display: flex; flex-direction: column; gap: 10px; }
+.enhance-item {
+    text-align: left; padding: 14px 16px; border-radius: 10px; border: 1px solid #bdb299;
+    background: #f1ebdb; color: #1d1b17; cursor: pointer;
+}
+.enhance-item.locked { opacity: 0.45; cursor: not-allowed; }
+.enhance-title { display: block; font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+.enhance-desc { display: block; font-size: 12px; color: #5f5849; }
+.yard-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 8px; }
+.yard-filters { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+.yard-filters select {
+    background: #f1ebdb; color: #1d1b17; border: 1px solid #e2dac6; border-radius: 6px; padding: 6px 8px; font-size: 13px;
+}
+@media (max-width: 800px) {
+    .yard-layout { grid-template-columns: 1fr; }
+    .main-container { flex-direction: column; }
+}
+
+
+/* ===== P8.4 募集 / レアリティ ===== */
+.rarity-badge {
+    display: inline-block; min-width: 22px; padding: 0 5px; margin-right: 2px;
+    border-radius: 4px; font-size: 10px; font-weight: 800; text-align: center; line-height: 16px;
+    font-family: 'IBM Plex Mono', monospace; vertical-align: middle;
+}
+.rarity-normal { background: #bdb299; color: #5f5849; }
+.rarity-rare   { background: #d8e0f0; color: #2f4a85; border: 1px solid #2f4a85; line-height: 14px; }
+.rarity-ur     { background: linear-gradient(135deg, #8a6d12, #8a6d12); color: #f6f1e4; border: 1px solid #c9a64e; line-height: 14px; }
+.bonus-line { color: #8a6d12; font-size: 12px; margin-top: 4px; }
+.bonus-mark { color: #8a6d12; font-size: 11px; }
+
+.recruit-wrap { max-width: 1100px; margin: 0 auto; padding: 0 8px; display: flex; flex-direction: column; gap: 10px; }
+.recruit-ctrl-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.recruit-kind { flex: 1; min-width: 220px; background: #f1ebdb; border: 1px solid #bdb299; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+.recruit-kind-title { font-weight: 700; font-size: 15px; }
+.recruit-paid-btn { background: #8a6d12; }
+.recruit-paid-btn:hover { background: #8a6d12; }
+.recruit-paid-btn:disabled { background: #cfc6ad; color: #5f5849; cursor: not-allowed; }
+.recruit-cands { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+.cand-card { background: #f1ebdb; border: 1px solid #bdb299; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 4px; }
+.cand-card.cand-rare { border-color: #2f4a85; box-shadow: 0 0 6px rgba(79,195,247,.25); }
+.cand-card.cand-ur { border-color: #8a6d12; box-shadow: 0 0 10px rgba(255,213,79,.4); background: #f3ecd2; }
+.cand-head { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 15px; }
+.cand-bonus { color: #8a6d12; font-size: 12px; min-height: 16px; }
+.cand-label { color: #5f5849; font-size: 10px; margin-top: 4px; letter-spacing: .06em; }
+.cand-stats { display: flex; flex-wrap: wrap; gap: 3px 8px; font-size: 11px; color: #2e2a22; font-family: 'IBM Plex Mono', monospace; }
+.cand-stat.up { color: #8a6d12; font-weight: 700; }
+.cand-stat small { font-size: 9px; margin-left: 1px; }
+.cand-join { margin-top: 8px; }
+
+
+/* ===== P8.5 遠征 ===== */
+.exp-wrap { max-width: 1400px; margin: 0 auto; padding: 0 8px; display: flex; flex-direction: column; gap: 10px; }
+.exp-two-col { display: grid; grid-template-columns: minmax(280px, 360px) 1fr; gap: 12px; align-items: start; }
+@media (max-width: 900px) {
+  .exp-two-col { grid-template-columns: 1fr; }
+}
+.exp-log-panel { min-width: 0; }
+.exp-log { max-height: 72vh; min-height: 320px; }
+.exp-battle-block { margin: 6px 0 10px 0; padding: 8px; background: #e9e2d0; border: 1px solid #bdb299; border-radius: 6px; }
+.exp-battle-head { color: #b3261e; font-weight: 700; font-size: 12px; margin-bottom: 6px; }
+.battle-log-table { width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'IBM Plex Mono', monospace; }
+.battle-log-table th { color: #5f5849; text-align: left; padding: 3px 5px; border-bottom: 1px solid #a89d84; white-space: nowrap; }
+.battle-log-table td { color: #2e2a22; padding: 2px 5px; border-bottom: 1px solid #f1ebdb; vertical-align: top; }
+.battle-log-table tr:hover td { background: #f1ebdb; }
+.battle-log-table td:nth-child(3) { color: #1d1b17; } /* Actor */
+.battle-log-table td:nth-child(5) { color: #2e6b3a; } /* Action */
+.exp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; margin: 8px 0; }
+.exp-grid label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: #5f5849; }
+.exp-grid select, .exp-grid input[type=number] { background: #f1ebdb; color: #1d1b17; border: 1px solid #e2dac6; border-radius: 6px; padding: 6px 8px; font-size: 13px; }
+.exp-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 10px 0; }
+.exp-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13px; }
+.exp-badge { padding: 4px 12px; border-radius: 6px; font-weight: 700; }
+.exp-badge.good { background: #d9e8d4; color: #2e6b3a; border: 1px solid #2e6b3a; }
+.exp-badge.warn { background: #f0e3b8; color: #8a6d12; border: 1px solid #8a6d12; }
+.exp-badge.bad  { background: #f2d9d4; color: #b3261e; border: 1px solid #b3261e; }
+.exp-line { padding: 2px 0; font-size: 12px; }
+.exp-line.head { color: #2f4a85; font-weight: 700; margin-top: 8px; border-bottom: 1px solid #a89d84; }
+.exp-line.battle { color: #b3261e; font-weight: 700; margin-top: 10px; }
+.exp-line.good { color: #2e6b3a; } .exp-line.bad { color: #b3261e; } .exp-line.warn { color: #8a6d12; }
+.exp-line.rec { color: #2f6b66; } .exp-line.state { color: #5f5849; } .exp-line.proto { color: #6b4a85; }
+.exp-detail { margin: 2px 0 4px 12px; font-size: 11px; color: #5f5849; }
+.exp-detail summary { cursor: pointer; color: #5f5849; }
+
+/* ===== P8.7 10連探索 / ログ速度 / Discord ===== */
+.exp-speedbar { display: flex; align-items: center; gap: 8px; margin: 6px 0; flex-wrap: wrap; }
+.exp-speed { display: inline-flex; gap: 4px; }
+.speed-btn { background: #f1ebdb; color: #2e2a22; border: 1px solid #bdb299; border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer; min-height: 32px; }
+.speed-btn.active { background: #e2d3b3; border-color: #2f4a85; color: #1d1b17; }
+.exp-run-sep { color: #2f4a85; font-weight: 700; margin-top: 14px; padding: 3px 0; border-top: 1px solid #a89d84; font-size: 12px; }
+.exp-batch-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 6px 0; }
+.exp-batch-table th, .exp-batch-table td { border-bottom: 1px solid #bdb299; padding: 4px 8px; text-align: left; }
+.exp-batch-table th { color: #5f5849; }
+.exp-batch-table tr.bad td { color: #b3261e; } .exp-batch-table tr.warn td { color: #8a6d12; } .exp-batch-table tr.good td { color: #2e6b3a; }
+.exp-batch-table tfoot td { font-weight: 700; color: #b3261e; }
+.exp-ad { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 8px 0; }
+.dc-box { margin: 8px 0; border: 1px solid #bdb299; border-radius: 8px; padding: 8px 10px; background: #f1ebdb; }
+.dc-box summary { cursor: pointer; font-size: 13px; color: #2f4a85; }
+.dc-grid { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; font-size: 12px; color: #5f5849; }
+.dc-grid label { display: flex; flex-direction: column; gap: 3px; }
+.dc-grid label.chk { flex-direction: row; align-items: center; gap: 6px; }
+.dc-url-row { display: flex; gap: 6px; } .dc-url-row input { flex: 1; min-width: 0; background: #f1ebdb; color: #1d1b17; border: 1px solid #e2dac6; border-radius: 6px; padding: 6px 8px; font-size: 13px; }
+.dc-ok { color: #2e6b3a; } .dc-ng { color: #b3261e; }
+
+
+/* P9.3.6 unlock screens */
+.unlock-panel { max-width: 640px; margin: 12px auto; padding: 16px; }
+.unlock-section { margin: 18px 0 8px; font-size: 14px; color: #b3261e; border-bottom: 1px solid #a89d84; padding-bottom: 4px; }
+.unlock-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #bdb299; }
+.unlock-main { flex: 1; min-width: 0; }
+.unlock-title { font-weight: 700; font-size: 13px; }
+.unlock-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.unlock-ok { color: #2e6b3a; }
+
+/* ===== Phase 3a クラウドセーブ ===== */
+.cloud-chip { font-size: 11px; padding: 3px 8px; border-radius: 10px; border: 1px solid #8a826f; background: #bdb299; color: #2e2a22; cursor: pointer; margin-left: 8px; }
+.cloud-chip.cloud-synced { border-color: #2e6b3a; color: #2e6b3a; }
+.cloud-chip.cloud-syncing, .cloud-chip.cloud-init { border-color: #2f4a85; color: #2f4a85; }
+.cloud-chip.cloud-dirty { border-color: #a8741a; color: #8a6d12; }
+.cloud-chip.cloud-offline, .cloud-chip.cloud-loggedout { border-color: #8a826f; color: #5f5849; }
+.cloud-chip.cloud-conflict { border-color: #b3261e; color: #b3261e; }
+.cloud-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 12px; }
+.cloud-dialog { width: 100%; max-width: 440px; max-height: 90vh; overflow: auto; }
+.cloud-row { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; padding: 3px 0; border-bottom: 1px solid #cfc6ad; }
+.cloud-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.cloud-sides { display: flex; gap: 10px; flex-wrap: wrap; }
+.cloud-side { flex: 1; min-width: 200px; border: 1px solid #9a917b; border-radius: 6px; padding: 8px; }
+.cloud-side-title { font-weight: 700; margin-bottom: 4px; }
+.cloud-banner { display: none; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; background: #e2d3b3; border: 1px solid #2f4a85; border-radius: 6px; padding: 8px 10px; margin-bottom: 10px; font-size: 13px; }
