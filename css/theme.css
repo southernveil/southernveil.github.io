@@ -538,3 +538,60 @@ html[data-lang="en"] .ts-para{font-family:'Cormorant Garamond',var(--serif);font
 @keyframes tsPulse{50%{opacity:.45;}}
 @media (prefers-reduced-motion:reduce){.ts-img.on,.ts-para,.ts-busy-text{animation:none;opacity:1;}.ts,.ts-img{transition:none;}}
 .ts-para .nb{white-space:nowrap;}
+
+/* ===== P9.22.0 ギルドの依頼（場面・拠点のカード・案内） ===== */
+.sc{position:fixed;inset:0;z-index:8300;background:#0e0c09;color:#f1eadb;opacity:0;transition:opacity .45s ease;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.sc.in{opacity:1;}
+.sc-bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 40%;filter:brightness(.62) saturate(.9);}
+.sc-npc{position:absolute;left:0;right:0;bottom:0;top:0;display:flex;justify-content:center;align-items:flex-end;pointer-events:none;}
+.sc-npc img{height:min(118vh,1100px);max-width:none;transform:translate(8%,30%);filter:drop-shadow(0 6px 18px rgba(0,0,0,.6));transition:filter .4s ease;animation:scIn .7s ease both;}
+.sc:not(.talking) .sc-npc img{filter:brightness(.72) drop-shadow(0 6px 18px rgba(0,0,0,.6));}
+@keyframes scIn{from{opacity:0;transform:translate(10%,31%);}to{opacity:1;transform:translate(8%,30%);}}
+@media (min-width:760px){.sc-npc{justify-content:flex-end;padding-right:6vw;}.sc-npc img{transform:translateY(28%);animation:none;}}
+.sc-top{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:max(12px,env(safe-area-inset-top)) 14px 12px;background:linear-gradient(180deg,rgba(10,8,5,.75),rgba(10,8,5,0));cursor:default;}
+.sc-chap{font-family:var(--serif);font-size:12px;letter-spacing:.14em;color:#d8ccb2;text-shadow:0 1px 3px rgba(0,0,0,.8);}
+.sc-skip{background:rgba(14,11,7,.45);border:1px solid rgba(241,234,219,.5);color:#f1eadb;font-size:12px;letter-spacing:.12em;padding:6px 14px;cursor:pointer;font-family:inherit;flex:none;}
+.sc-box{position:absolute;left:12px;right:12px;bottom:max(14px,env(safe-area-inset-bottom));max-width:760px;margin:0 auto;min-height:132px;box-sizing:border-box;padding:20px 18px 26px;background:rgba(14,11,7,.88);border:1px solid rgba(201,166,78,.6);box-shadow:inset 0 0 0 3px rgba(14,11,7,.9),inset 0 0 0 4px rgba(201,166,78,.25),0 8px 24px rgba(0,0,0,.5);}
+.sc-name{position:absolute;top:-13px;left:14px;background:#1d1b17;border:1px solid rgba(201,166,78,.7);padding:2px 14px;font-family:var(--serif);font-weight:700;font-size:13px;letter-spacing:.2em;color:#e8d9a8;}
+.sc-name:empty{display:none;}
+.sc-text{font-family:var(--serif);font-size:15px;line-height:1.95;letter-spacing:.03em;white-space:pre-line;}
+.sc-text.show{animation:scText .45s ease both;}
+@keyframes scText{from{opacity:0;}to{opacity:1;}}
+.sc-box.narr .sc-text{color:#cfc4ad;font-size:14px;}
+html[data-lang="en"] .sc-text{font-family:'Cormorant Garamond',var(--serif);font-size:17px;line-height:1.6;font-weight:600;letter-spacing:0;}
+.sc-more{position:absolute;right:14px;bottom:6px;font-size:10px;color:#c9a64e;animation:tsPulse 1.4s ease-in-out infinite;}
+@media (prefers-reduced-motion:reduce){.sc-npc img,.sc-text.show,.sc-more{animation:none;}}
+
+.home-quest{margin:0 0 14px;}
+.hq{display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--ink);background:linear-gradient(180deg,#fbf7ec,#f3ecda);box-shadow:inset 0 0 0 3px #f6f1e4,inset 0 0 0 4px rgba(29,27,23,.18);}
+.hq-face{width:56px;height:56px;flex:none;border:1px solid var(--ink);object-fit:cover;background:#3a342a;}
+.hq-main{flex:1;min-width:0;}
+.hq-eyebrow{font-family:var(--serif);font-size:11px;letter-spacing:.12em;color:var(--stamp);}
+.hq-title{font-family:var(--serif);font-weight:900;font-size:16px;margin:2px 0;line-height:1.4;}
+.hq-detail{font-size:12px;color:var(--muted);line-height:1.5;}
+.hq-btns{display:flex;align-items:center;gap:12px;margin-top:8px;flex-wrap:wrap;}
+.hq-log{background:none;border:none;padding:0;color:var(--muted);font-size:12px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-family:inherit;}
+.hq-done .hq-title{color:var(--muted);}
+.sl-card{max-width:380px;width:calc(100vw - 32px);box-sizing:border-box;}
+.sl-chap{font-family:var(--serif);font-weight:700;font-size:13px;margin:10px 0 6px;color:var(--muted);letter-spacing:.08em;}
+.sl-item{display:block;width:100%;text-align:left;padding:10px 12px;margin:0 0 6px;border:1px solid var(--line);background:#fffdf7;cursor:pointer;font-family:var(--serif);font-size:14px;color:var(--ink);}
+.sl-item:hover,.sl-item:focus-visible{background:#f1ead8;outline:none;}
+.nav-btn.has-dot,.enhance-item.has-dot{position:relative;}
+.nav-btn.has-dot::after,.enhance-item.has-dot::after{content:"";position:absolute;top:6px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--stamp);box-shadow:0 0 0 2px var(--panel);}
+.tip-face{width:34px;height:34px;object-fit:cover;border:1px solid var(--ink);display:block;}
+.gd-sec{border-top:1px solid var(--line);}
+.gd-sec:last-of-type{border-bottom:1px solid var(--line);}
+.gd-sec summary{cursor:pointer;padding:12px 2px;font-family:var(--serif);font-weight:700;font-size:15px;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+.gd-sec summary::-webkit-details-marker{display:none;}
+.gd-sec summary::after{content:"＋";font-family:var(--mono);color:var(--muted);}
+.gd-sec[open] summary::after{content:"－";}
+.gd-body{padding:0 2px 14px;}
+.gd-list{margin:0;padding-left:1.2em;}
+.gd-list li{font-size:13.5px;line-height:1.8;margin:0 0 4px;}
+.gd-cls{font-family:var(--serif);font-weight:700;font-size:13px;margin:10px 0 4px;color:var(--stamp);letter-spacing:.06em;}
+.gd-act{width:100%;border-collapse:collapse;font-size:13px;}
+.gd-act th,.gd-act td{border-top:1px solid var(--line);padding:6px 4px;vertical-align:top;text-align:left;line-height:1.6;}
+.gd-act th{width:9.5em;font-weight:700;white-space:nowrap;}
+.gd-act th small{display:block;font-weight:400;color:var(--muted);font-family:var(--mono);font-size:11px;}
+.gd-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+@media (max-width:420px){.gd-act th{width:7.5em;white-space:normal;}}

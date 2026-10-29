@@ -553,7 +553,7 @@ function fxSettingsHtml() {
     return `<div class="fx-settings">
         <label class="fx-switch"><input type="checkbox" id="fx-opt-sound" ${fxSettings.sound ? 'checked' : ''} onchange="fxSetSound(this.checked)"> 効果音</label>
         <label class="fx-switch"><input type="checkbox" id="fx-opt-lite" ${fxSettings.motion === 'lite' ? 'checked' : ''} onchange="fxSetLite(this.checked)"> 演出を控えめにする（カードを出さず短い通知だけ）</label>
-        <div><button type="button" class="btn btn-sm btn-blue" onclick="if (typeof closeSettings === 'function') closeSettings(); fxShowIntro();">遊び方をもう一度見る</button>
+        <div><button type="button" class="btn btn-sm btn-blue" onclick="if (typeof closeSettings === 'function') closeSettings(); showScreen('guide');">遊び方</button>
             ${typeof titleOpen === 'function' ? `<button type="button" class="btn btn-sm btn-blue" onclick="if (typeof closeSettings === 'function') closeSettings(); titleOpen({ replay: true });">導入をもう一度見る</button>` : ''}</div>
     </div>`;
 }

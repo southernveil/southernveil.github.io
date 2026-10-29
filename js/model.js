@@ -1056,6 +1056,7 @@ function ensureAccountUnlocksShape() {
     if (!accountUnlocks || typeof accountUnlocks !== 'object') {
         accountUnlocks = { targets: null, conditions: null, accessories: [], reachedStages: {}, stageCleared: {}, lv10Reached: false };
     }
+    if (!Array.isArray(accountUnlocks.story)) accountUnlocks.story = [];
     ['adPoints', 'adToday', 'adLastAt', 'yardExtra', 'partyExtra'].forEach(k => { if (!(accountUnlocks[k] >= 0)) accountUnlocks[k] = 0; });
     if (typeof accountUnlocks.adDay !== 'string') accountUnlocks.adDay = '';
     if (!Array.isArray(accountUnlocks.accessories)) accountUnlocks.accessories = [];
@@ -1069,6 +1070,23 @@ function ensureAccountUnlocksShape() {
     if (!poolClaims || typeof poolClaims !== 'object') poolClaims = { date: '', claimedToday: {} };
     if (!poolClaims.claimedToday) poolClaims.claimedToday = {};
 }
+/* ---- P9.22.0 メインクエストの進み具合 ---- */
+function storySeen(id) { ensureAccountUnlocksShape(); return accountUnlocks.story.indexOf(id) >= 0; }
+/** この場面を今見てよいか（順番と踏破の条件。later の時間差は画面側で見る） */
+function storyCanSee(id) {
+    const d = (typeof storyStepDef === 'function') ? storyStepDef(id) : null;
+    if (!d || storySeen(id)) return false;
+    if (d.need && !storySeen(d.need)) return false;
+    if (d.clear) { const k = d.clear.split(':'); if (!isStageCleared(k[0], k[1], k[2])) return false; }
+    return true;
+}
+function storyMarkSeen(id) {
+    if (!storyCanSee(id)) return { ok: false, reason: 'まだこの話は見られません' };
+    accountUnlocks.story.push(id);
+    if (typeof persist === 'function') persist();
+    return { ok: true };
+}
+
 /** 明示リストがある場合、初期解放項目が欠けていれば補完する */
 function syncInitialUnlocksIntoLists() {
     ensureAccountUnlocksShape();

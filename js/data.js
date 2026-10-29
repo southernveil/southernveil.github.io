@@ -249,7 +249,7 @@ const targets = [
 ];
 
 const ATTACK_SKILLS = [
-    '通常攻撃', '強撃', 'リベンジブロウ', 'ガードブレイク', 'ファイア', '毒手', 'セイントストライク', 'ポイズンボム',
+    '通常攻撃', 'ダブルアタック', 'リベンジブロウ', 'ガードブレイク', 'ファイア', '毒手', 'セイントストライク', 'ポイズンボム',
     '居合一閃', '魔剣解放', 'メテオ', 'カオスゲート', 'マナブレイク', '深淵の呪詛',
     '幻影剣舞', 'オール・イン', '影分身'
 ];
@@ -260,7 +260,7 @@ const AOE_SKILLS = [
 
 const SKILL_DEFS = {
     attack:         { name: '通常攻撃',           uses: -1, type: 'single', ratio: 1.0, atkStat: 'atk', defStat: 'def', unlockLevel: 1 },
-    heavy:          { name: '強撃',               uses: 10, type: 'single', ratio: 0.9, hits: 2, atkStat: 'atk', defStat: 'def', unlockLevel: 1 },
+    heavy:          { name: 'ダブルアタック',               uses: 10, type: 'single', ratio: 0.9, hits: 2, atkStat: 'atk', defStat: 'def', unlockLevel: 1 },
     revengeBlow:    { name: 'リベンジブロウ',     uses: 5,  type: 'single', ratio: 1.0, atkStat: 'atk', defStat: 'def', unlockLevel: 10 },
     guardBreak:     { name: 'ガードブレイク',     uses: 10, type: 'single', ratio: 1.2, atkStat: 'atk', defStat: 'def', unlockLevel: 15, defDown: 0.3, defDownTurns: 3 },
     guardUp:        { name: 'ガードアップ',       uses: 10, type: 'aoe',    ratio: 0, unlockLevel: 5 },
@@ -472,6 +472,21 @@ function getClassDef(classId) {
     return CLASS_DEFS[classId] || null;
 }
 /**
+ * P9.22.0 メインクエスト（ギルドマスター・ガレオンの依頼）の進み具合
+ * 場面の文章は js/story.js（画面側）。ここは「どの順に・何を満たしたら見られるか」だけ（サーバーも検証に使う）
+ *   need: 先に見ている必要がある場面 / clear: 本番で踏破している必要があるステージ（dungeon:stage:mode）
+ *   later: 前の場面を見たのとは別の機会（次に拠点を開いたとき・次の帰還）に出す
+ */
+const STORY_STEPS = [
+    { id: 'c1_intro', chapter: 1, need: null },
+    { id: 'c1_f1', chapter: 1, need: 'c1_intro', clear: 'labyrinth:f1:normal' },
+    { id: 'c1_b1', chapter: 1, need: 'c1_f1', clear: 'labyrinth:b1:normal' },
+    { id: 'c1_b2', chapter: 1, need: 'c1_b1', clear: 'labyrinth:b2:normal' },
+    { id: 'c1_remnant', chapter: 1, need: 'c1_b2', later: true }
+];
+function storyStepDef(id) { return STORY_STEPS.find(s => s.id === id) || null; }
+
+/**
  * P9.20.0 立ち絵のプリセット。img/pt/<key>.webp（駒用・上半身）と img/pt/<key>-full.webp（全身）
  * 性別などの区別はシステムに持たせない。どのキャラにも好きな絵を選べる（選んでいなければクラスの2枚から自動）
  */
@@ -575,7 +590,7 @@ function getSkillCombatParams(ch, skillName) {
         base.guardTurns = 3;
         base.guardMnd = true;
     }
-    if (skillName === '強撃' && historyHasClass(ch, 'rune_knight')) {
+    if (skillName === 'ダブルアタック' && historyHasClass(ch, 'rune_knight')) {
         base.ratio = 0.7;
         base.hits = 3;
     }
@@ -664,7 +679,7 @@ const ENEMY_TEMPLATES = {
         growth: { hp: 1.5, atk: 1.7, def: 1.5, int: 1.5, mnd: 1.5, agi: 1.5, dex: 1.5 },
         rules: [
             ['自身のHPが50%以下', '敵: HP最低', 'リベンジブロウ'],
-            ['常に', '敵: HP最低', '強撃']
+            ['常に', '敵: HP最低', 'ダブルアタック']
         ]
     },
     erode_weaver: {
@@ -706,7 +721,7 @@ const ENEMY_TEMPLATES = {
         rules: [
             ['自身のHPが50%以下', '味方: HP最低', '捕食'],
             ['味方に戦闘不能がいる', '味方: 戦闘不能', '蘇生'],
-            ['常に', '敵: HP最低', '強撃']
+            ['常に', '敵: HP最低', 'ダブルアタック']
         ]
     },
 
@@ -718,7 +733,7 @@ const ENEMY_TEMPLATES = {
         growthNote: [110, 18, 12, 9, 9, 7, 9],
         rules: [
             ['自身のHPが50%以下', '敵: HP最低', 'リベンジブロウ'],
-            ['常に', '敵1体', '強撃']
+            ['常に', '敵1体', 'ダブルアタック']
         ],
         drops: [
             { type: 'target', id: '敵: HP最低', rate: 0.5, label: '敵最低HP（ターゲット）' }
@@ -731,7 +746,7 @@ const ENEMY_TEMPLATES = {
         base: { hp: 75, atk: 14, def: 8, int: 6, mnd: 6, agi: 5, dex: 6 },
         growth: { hp: 1.2, atk: 1.7, def: 1.5, int: 1.5, mnd: 1.2, agi: 1.3, dex: 1.5 },
         rules: [
-            ['自身のHPが50%以下', '敵: HP最低', '強撃'],
+            ['自身のHPが50%以下', '敵: HP最低', 'ダブルアタック'],
             ['常に', '敵1体', '通常攻撃']
         ]
     },
@@ -785,7 +800,7 @@ const ENEMY_TEMPLATES = {
         rules: [
             ['味方のHPが80%以下', '味方: HP最低', 'ガードアップ'],
             ['自身のHPが50%以下', '敵: HP最低', 'リベンジブロウ'],
-            ['常に', '敵1体', '強撃'],
+            ['常に', '敵1体', 'ダブルアタック'],
             ['常に', '敵1体', '通常攻撃']
         ]
     },

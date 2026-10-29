@@ -738,8 +738,8 @@ function runBattleCore(opts) {
                 tName = `${charMeta[targetId].name} を中心に範囲`;
                 status = mods.guardMnd ? `DEF/MND+40%(${gTurns}T) ×${applied}` : `DEF+40%(${gTurns}T) ×${applied}`;
                 val = '-';
-            } else if (chosen.action === '強撃' && targetId) {
-                const mods = getSkillCombatParams(unit, '強撃');
+            } else if (chosen.action === 'ダブルアタック' && targetId) {
+                const mods = getSkillCombatParams(unit, 'ダブルアタック');
                 const hitRatio = mods.ratio != null ? mods.ratio : 0.8;
                 const hitCount = mods.hits != null ? mods.hits : 2;
                 let charged = false;
@@ -808,7 +808,7 @@ function runBattleCore(opts) {
                     useRatio = mods.ratio;
                 }
                 // 多段（メテオ・幻影・影分身）
-                const hitCount = (mods.hits && mods.hits > 1 && chosen.action !== '強撃') ? mods.hits : 1;
+                const hitCount = (mods.hits && mods.hits > 1 && chosen.action !== 'ダブルアタック') ? mods.hits : 1;
                 if (hitCount > 1) {
                     const hitVals = [];
                     for (let h = 0; h < hitCount; h++) {

@@ -3,7 +3,7 @@
  */
 const MAX_PARTY = 4;
 const PARTY_SET_COUNT = 3;
-const APP_VERSION = 'P9.21.1';
+const APP_VERSION = 'P9.22.0';
 const MAX_RULES = 10;
 
 /** 統合リソース表示名（P9確定） */

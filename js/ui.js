@@ -282,6 +282,7 @@ let yardDetailId = null;
 
 function updateResourceUI() {
     const v = (typeof getResource === 'function') ? getResource() : 0;
+    if (typeof storyNavDot === 'function') storyNavDot();
     ['resource-value', 'home-resource-value', 'enhance-resource-value'].forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
@@ -295,7 +296,7 @@ function updateResourceUI() {
 function showScreen(name) {
     if (name !== currentScreen && typeof fxReleaseDeferred === 'function') fxReleaseDeferred();
     currentScreen = name || 'home';
-    ['home', 'sortie', 'enhance', 'yard', 'recruit', 'expedition', 'accessory-inv', 'rule-unlock', 'ad-shop', 'train', 'chat', 'arena'].forEach(s => {
+    ['home', 'sortie', 'enhance', 'yard', 'recruit', 'expedition', 'accessory-inv', 'rule-unlock', 'ad-shop', 'train', 'chat', 'arena', 'guide'].forEach(s => {
         const el = document.getElementById('screen-' + s);
         if (el) el.style.display = (s === currentScreen) ? 'block' : 'none';
     });
@@ -304,7 +305,12 @@ function showScreen(name) {
         btn.classList.toggle('active', btn.getAttribute('data-screen') === (navOf[currentScreen] || currentScreen));
     });
     if (typeof cloudRenderBanner === 'function') cloudRenderBanner();
-    if (currentScreen === 'home') { renderHomeParty(); renderHomeGoals(); renderHomePlayer(); if (typeof chatCheckUnread === 'function') chatCheckUnread(); }
+    if (currentScreen === 'home') {
+        renderHomeParty(); renderHomeGoals(); renderHomePlayer(); if (typeof chatCheckUnread === 'function') chatCheckUnread();
+        if (typeof renderHomeQuest === 'function') renderHomeQuest();
+        if (typeof storyCheck === 'function') setTimeout(storyCheck, 250);
+    }
+    if (currentScreen === 'guide' && typeof renderGuide === 'function') renderGuide();
     if (currentScreen === 'yard') renderYardScreen();
     if (currentScreen === 'accessory-inv' && typeof renderAccessoryInventory === 'function') renderAccessoryInventory();
     if (currentScreen === 'rule-unlock' && typeof renderRuleUnlockScreen === 'function') renderRuleUnlockScreen();
@@ -697,6 +703,7 @@ function initExpeditionScreen() {
         onExpDungeonChange();
         onExpProtoChange();
     }
+    if (typeof expDryChecked === 'function') expDryChecked();   // 一般のプレイヤーにはテスト実行を出さない
     renderExpInfo();
 }
 
@@ -1225,7 +1232,8 @@ async function pnameSubmit() {
     const ov = document.getElementById('pname-overlay');
     if (ov) ov.remove();
     if (typeof fxToast === 'function') fxToast('<b>ようこそ、' + esc(r.result.name) + '</b><span>冒険者台帳に登録しました</span>', { tone: 'gold', sound: 'chime', key: 'pname' });
-    if (typeof fxIntroOnce === 'function') setTimeout(fxIntroOnce, 400);
+    // P9.22.0 名前の登録に続けて、ギルドマスターからの最初の依頼
+    if (typeof storyAfterName === 'function') storyAfterName();
 }
 function renderHomePlayer() {
     const el = document.getElementById('home-player');
@@ -1361,8 +1369,11 @@ function homeGoals() {
     }
     // ノーマルの踏破（公開中の最初の未踏破）
     let normalGoal = null, challengeGoal = null;
+    // P9.22.0 迷宮の進め方は「ギルドの依頼」が示すので、ここでは出さない（依頼が終わったら従来どおり）
+    const quest = (typeof storyObjective === 'function') ? storyObjective() : null;
+    const questOwns = d => d === 'labyrinth' && quest && !quest.done;
     Object.keys(DUNGEON_DEFS).forEach(d => {
-        if (!isContentPublic(d, 'normal')) return;
+        if (!isContentPublic(d, 'normal') || questOwns(d)) return;
         (DUNGEON_DEFS[d].stages || []).forEach(s => {
             if (normalGoal || isStageCleared(d, s.id, 'normal')) return;
             normalGoal = { title: `${DUNGEON_DEFS[d].name} ${s.name} を踏破`, reward: homeStageRewards(d, s.id, 'normal').join('・') || `撃破 ${s.ssPerEnemy || 0} SS/体（敵Lv${s.lv[0]}〜${s.lv[1]}）`, go: `expGoTo('${d}','${s.id}','normal')` };
@@ -1370,7 +1381,7 @@ function homeGoals() {
     });
     // チャレンジ（挑める中で最初の未踏破）
     Object.keys(DUNGEON_DEFS).forEach(d => {
-        if (!isContentPublic(d, 'challenge')) return;
+        if (!isContentPublic(d, 'challenge') || questOwns(d)) return;
         (DUNGEON_DEFS[d].stages || []).forEach(s => {
             if (challengeGoal || !s.challengeUnlock || isStageCleared(d, s.id, 'challenge') || !isChallengeStageUnlocked(d, s.id)) return;
             const rw = homeStageRewards(d, s.id, 'challenge');

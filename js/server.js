@@ -278,7 +278,8 @@ async function serverStartup() {
 function serverReadyUi() {
     if (typeof chatCheckUnread === 'function') chatCheckUnread();
     const asking = (typeof pnameEnsure === 'function') && pnameEnsure();
-    if (!asking && typeof fxIntroOnce === 'function') fxIntroOnce();
+    // P9.22.0 遊び方の案内カードは出さない（ギルドの依頼と、必要なときの一言で案内する）。見ていない場面があれば出す
+    if (!asking && typeof storyCheck === 'function') setTimeout(storyCheck, 1200);
 }
 
 async function serverHandleEmpty() {
@@ -583,7 +584,7 @@ function serverInstallOverrides() {
         window.onExpRun = async function () {
             if (typeof batchRunning !== 'undefined' && batchRunning) return;
             if (!serverGate()) return;
-            const dry = !!(document.getElementById('exp-dry') && document.getElementById('exp-dry').checked);
+            const dry = (typeof expDryChecked === 'function') ? expDryChecked() : !!(document.getElementById('exp-dry') && document.getElementById('exp-dry').checked);
             if (dry) {
                 const snap = serverSimBegin();
                 try { await orig(); } finally { serverSimEnd(snap); }
@@ -608,7 +609,7 @@ function serverInstallOverrides() {
         window.onExpRun10 = async function () {
             if (typeof batchRunning !== 'undefined' && batchRunning) return;
             if (!serverGate()) return;
-            const dry = !!(document.getElementById('exp-dry') && document.getElementById('exp-dry').checked);
+            const dry = (typeof expDryChecked === 'function') ? expDryChecked() : !!(document.getElementById('exp-dry') && document.getElementById('exp-dry').checked);
             if (dry) {
                 const snap = serverSimBegin();
                 try { await orig10(); } finally { serverSimEnd(snap); }

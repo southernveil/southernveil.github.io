@@ -262,12 +262,22 @@ function expOpts() {
         stageId: document.getElementById('exp-stage').value,
         mode: document.getElementById('exp-mode').value,
         protocol: getExpProtocol(),
-        applyResources: !document.getElementById('exp-dry').checked
+        applyResources: !expDryChecked()
     };
 }
 
 function expPartyEmpty() { return typeof getPartyChars === 'function' && !getPartyChars().length; }
-function expDryChecked() { const d = document.getElementById('exp-dry'); return !!(d && d.checked); }
+/** P9.22.0 テスト実行は開発者だけ（開発環境か、開発者アカウント）。一般のプレイヤーには出さず、常に本番 */
+function expDryAllowed() {
+    if (typeof isDevEnvironment === 'function' && isDevEnvironment()) return true;
+    return !!(typeof serverState !== 'undefined' && serverState && serverState.isDev);
+}
+function expDryChecked() {
+    const d = document.getElementById('exp-dry');
+    const ok = expDryAllowed();
+    if (d) { const lab = d.closest('label'); if (lab) lab.style.display = ok ? '' : 'none'; if (!ok) d.checked = false; }
+    return !!(ok && d && d.checked);
+}
 /** 出撃のクールタイムの残り（ミリ秒）。サーバー版のみ。テスト実行には関係しない */
 function expCooldownRemaining() {
     return (typeof serverState !== 'undefined' && serverState.expReadyLocal) ? Math.max(0, serverState.expReadyLocal - Date.now()) : 0;
@@ -508,6 +518,7 @@ function expGateClose(watch) {
     const ov = document.getElementById('exp-gate');
     if (ov) { ov.classList.remove('fx-in'); ov.style.display = 'none'; }
     if (typeof g.onGo === 'function') g.onGo(!!watch);
+    if (typeof storyAfterReturn === 'function') storyAfterReturn();   // P9.22.0 報告の場面・強化の一言
 }
 async function onGateAd(choice) {
     if (!expGate || expGate.busy || typeof serverAdBonus !== 'function') return;
