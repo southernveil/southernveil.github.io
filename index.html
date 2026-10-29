@@ -15,9 +15,9 @@
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@500;700;900&family=Cormorant+Garamond:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/main.css?v=P9.22.0">
-    <link rel="stylesheet" href="css/theme.css?v=P9.22.0">
-    <link rel="stylesheet" href="css/fx.css?v=P9.22.0">
+    <link rel="stylesheet" href="css/main.css?v=P9.22.1">
+    <link rel="stylesheet" href="css/theme.css?v=P9.22.1">
+    <link rel="stylesheet" href="css/fx.css?v=P9.22.1">
 </head>
 <body>
 <!-- 起動時のタイトル（接続が終わると消える。操作の邪魔はしない） -->
@@ -45,6 +45,7 @@
     <nav class="app-nav" id="app-nav">
         <button type="button" class="nav-btn active" data-screen="home" onclick="showScreen('home')">拠点</button>
         <button type="button" class="nav-btn" data-screen="expedition" onclick="showScreen('expedition')">遠征</button>
+        <button type="button" class="nav-btn" data-screen="arena" onclick="showScreen('arena')">闘技場</button>
         <button type="button" class="nav-btn" data-screen="sortie" onclick="showScreen('sortie')">ルール編集</button>
         <button type="button" class="nav-btn" data-screen="yard" onclick="showScreen('yard')">編成</button>
         <button type="button" class="nav-btn" data-screen="enhance" onclick="showScreen('enhance')">強化</button>
@@ -78,8 +79,19 @@
         </div>
         <div class="home-player" id="home-player"></div>
         <div id="home-quest" class="home-quest" style="display:none;"></div>
-        <button type="button" class="home-btn home-btn-primary" style="width:100%;margin-bottom:14px;" onclick="showScreen('expedition')">遠征<span class="home-ct" id="home-exp-ct"></span></button>
-        <button type="button" class="home-btn home-arena-btn" style="width:100%;margin-bottom:14px;" onclick="showScreen('arena')">闘技場<span class="home-ct">パーティAで自動参加</span></button>
+        <!-- P9.22.1 遠征・闘技場は絵のついたカード型のボタン（押せるものだと分かるように「›」付き） -->
+        <div class="home-cards">
+            <button type="button" class="home-card home-card-exp" onclick="showScreen('expedition')">
+                <img src="img/bg/labyrinth-sm.webp" alt="" loading="lazy" decoding="async">
+                <span class="hc-body"><span class="hc-title">遠征</span><span class="hc-sub">ダンジョンへ出撃して SS を持ち帰る</span><span class="home-ct" id="home-exp-ct"></span></span>
+                <span class="hc-go" aria-hidden="true">出撃 ›</span>
+            </button>
+            <button type="button" class="home-card home-card-arena" onclick="showScreen('arena')">
+                <img src="img/bg/arena-sm.webp" alt="" loading="lazy" decoding="async">
+                <span class="hc-body"><span class="hc-title">闘技場</span><span class="hc-sub">パーティAで自動参加</span></span>
+                <span class="hc-go" aria-hidden="true">見る ›</span>
+            </button>
+        </div>
         <div class="mat">
             <div class="mat-label" id="home-party-label">出撃編成</div>
             <div class="mat-row" id="home-party-row"></div>
@@ -231,7 +243,7 @@
 
 <!-- ===== 遠征（Phase1 確認用：戦闘→事後回復→撤退判定のループ） ===== -->
 <section id="screen-expedition" class="app-screen" style="display:none;">
-    <div class="scene" id="exp-scene"><img id="exp-scene-img" alt="" loading="lazy" decoding="async" sizes="(max-width: 520px) 100vw, 520px"><div class="scene-cap"><b id="exp-scene-title"></b><span id="exp-scene-sub"></span></div></div>
+    <div class="scene" id="exp-scene"><img id="exp-scene-img" alt="" loading="lazy" decoding="async" sizes="(max-width: 520px) 100vw, 520px"><i class="scene-aura" aria-hidden="true"></i><div class="scene-cap"><b id="exp-scene-title"></b><em class="scene-badge" id="exp-scene-badge">チャレンジ</em><span id="exp-scene-sub"></span></div></div>
     <div class="exp-wrap exp-two-col">
         <div class="panel exp-settings">
             <h2>遠征</h2>
@@ -240,8 +252,9 @@
                 <label>ステージ<select id="exp-stage" onchange="renderExpInfo()"></select></label>
                 <label>モード<select id="exp-mode" onchange="renderExpInfo()"></select></label>
                 <label>撤退プロトコル<select id="exp-proto" onchange="onExpProtoChange()"></select></label>
-                <label>値<input type="number" id="exp-proto-val" value="1" onchange="renderExpInfo()"><span id="exp-proto-unit" class="meta"></span></label>
+                <label>N の値<input type="number" id="exp-proto-val" value="1" onchange="renderExpInfo()" oninput="expProtoHelp()"><span id="exp-proto-unit" class="meta"></span></label>
             </div>
+            <div id="exp-proto-help" class="exp-proto-help"></div>
             <div id="exp-info" class="hint"></div>
             <div class="exp-actions">
                 <button type="button" class="btn" id="exp-run" onclick="onExpRun()">出撃</button>
@@ -386,30 +399,30 @@
     </div>
 </div>
 
-<script src="js/i18n-en.js?v=P9.22.0"></script>
-<script src="js/i18n.js?v=P9.22.0"></script>
-<script src="js/common.js?v=P9.22.0"></script>
-<script src="js/standee.js?v=P9.22.0"></script>
-<script src="js/fx.js?v=P9.22.0"></script>
-<script src="js/data.js?v=P9.22.0"></script>
-<script src="js/model.js?v=P9.22.0"></script>
-<script src="js/storage.js?v=P9.22.0"></script>
+<script src="js/i18n-en.js?v=P9.22.1"></script>
+<script src="js/i18n.js?v=P9.22.1"></script>
+<script src="js/common.js?v=P9.22.1"></script>
+<script src="js/standee.js?v=P9.22.1"></script>
+<script src="js/fx.js?v=P9.22.1"></script>
+<script src="js/data.js?v=P9.22.1"></script>
+<script src="js/model.js?v=P9.22.1"></script>
+<script src="js/storage.js?v=P9.22.1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="js/cloud-config.js?v=P9.22.0"></script>
-<script src="js/title.js?v=P9.22.0"></script>
-<script src="js/story.js?v=P9.22.0"></script>
-<script src="js/guide.js?v=P9.22.0"></script>
-<script src="js/cloud.js?v=P9.22.0"></script>
-<script src="js/recruit.js?v=P9.22.0"></script>
-<script src="js/engine.js?v=P9.22.0"></script>
-<script src="js/expedition.js?v=P9.22.0"></script>
-<script src="js/batch.js?v=P9.22.0"></script>
-<script src="js/ads.js?v=P9.22.0"></script>
-<script src="js/ui.js?v=P9.22.0"></script>
-<script src="js/batch-ui.js?v=P9.22.0"></script>
-<script src="js/server.js?v=P9.22.0"></script>
-<script src="js/chat.js?v=P9.22.0"></script>
-<script src="js/arena.js?v=P9.22.0"></script>
-<script src="js/cloud-ui.js?v=P9.22.0"></script>
+<script src="js/cloud-config.js?v=P9.22.1"></script>
+<script src="js/title.js?v=P9.22.1"></script>
+<script src="js/story.js?v=P9.22.1"></script>
+<script src="js/guide.js?v=P9.22.1"></script>
+<script src="js/cloud.js?v=P9.22.1"></script>
+<script src="js/recruit.js?v=P9.22.1"></script>
+<script src="js/engine.js?v=P9.22.1"></script>
+<script src="js/expedition.js?v=P9.22.1"></script>
+<script src="js/batch.js?v=P9.22.1"></script>
+<script src="js/ads.js?v=P9.22.1"></script>
+<script src="js/ui.js?v=P9.22.1"></script>
+<script src="js/batch-ui.js?v=P9.22.1"></script>
+<script src="js/server.js?v=P9.22.1"></script>
+<script src="js/chat.js?v=P9.22.1"></script>
+<script src="js/arena.js?v=P9.22.1"></script>
+<script src="js/cloud-ui.js?v=P9.22.1"></script>
 </body>
 </html>

@@ -735,9 +735,14 @@ function expSceneUpdate(d) {
         img.srcset = `img/bg/${key}-sm.webp 800w, img/bg/${key}.webp 1600w`;
         img.src = `img/bg/${key}-sm.webp`;
     }
+    // P9.22.1 チャレンジは同じ絵に禍々しいオーラと枠を重ねて見分けられるように
+    const ms = document.getElementById('exp-mode');
+    const ch = !!(ms && ms.value === 'challenge');
+    box.classList.toggle('challenge', ch);
     const t = document.getElementById('exp-scene-title'), s = document.getElementById('exp-scene-sub');
+    const sub = ch ? ((d.challengeEnv && d.challengeEnv.label) || '') : (d.tag || '');
     if (t.dataset.v !== d.name) { t.dataset.v = d.name; t.textContent = d.name; }
-    if (s.dataset.v !== (d.tag || '')) { s.dataset.v = d.tag || ''; s.textContent = d.tag || ''; }
+    if (s.dataset.v !== sub) { s.dataset.v = sub; s.textContent = sub; }
 }
 
 /** 起動時のタイトル：接続が終わったら（最短0.9秒・最長10秒）消す */
@@ -772,6 +777,25 @@ function onExpProtoChange() {
     renderExpInfo();
 }
 
+/** P9.22.1 選んだ撤退プロトコルが何をするかを、今の N で1文に */
+function expProtoHelp() {
+    const box = document.getElementById('exp-proto-help');
+    if (!box) return;
+    const mode = (document.getElementById('exp-mode') || {}).value;
+    let t;
+    if (mode === 'challenge') t = 'チャレンジでは撤退できません。最後の戦闘まで進みます';
+    else {
+        const pr = getExpProtocol();
+        if (pr.type === 'down') t = t_('戦闘のあと、倒れた仲間が {n} 人以上いれば基地へ引き返す', pr.value);
+        else if (pr.type === 'healLeft') t = t_('戦闘のあと、ヒール系アクションの残り回数（全員の合計）が {n} 回以下なら基地へ引き返す', pr.value);
+        else if (pr.type === 'avgHp') t = t_('戦闘のあと、パーティの平均HP（倒れた仲間は0%）が {n}% 以下なら基地へ引き返す', pr.value);
+        else t = '条件を付けず、最後の戦闘まで進む';
+        if (pr.type !== 'none') t += '。引き返すと、それまでの SS を持って無事に帰還します';
+    }
+    if (box.dataset.v !== t) { box.dataset.v = t; box.textContent = t; }
+}
+function t_(s, n) { return s.replace('{n}', String(n)); }
+
 function getExpProtocol() {
     const type = document.getElementById('exp-proto').value;
     const p = RETREAT_PROTOCOLS[type];
@@ -805,6 +829,7 @@ function renderExpInfo() {
             protoVal.disabled = !p || p.id === 'none';
         }
     }
+    expProtoHelp();
     const lv = (mode === 'challenge' && st.challengeLv) ? st.challengeLv : st.lv;
     const sz = (mode === 'challenge' && st.challengeSize) ? st.challengeSize : st.size;
     const nb = st.battles || EXPEDITION_BATTLES[0];
