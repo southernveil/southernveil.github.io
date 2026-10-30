@@ -180,6 +180,20 @@ function isStageCleared(dungeonId, stageId, mode) {
     ensureAccountUnlocksShape();
     return !!accountUnlocks.stageCleared[stageClearKey(dungeonId, stageId, mode)];
 }
+/** P9.23.0 ノーマルのステージが解放されているか（stage.unlock が無ければ常に解放） */
+function isNormalStageUnlocked(dungeonId, stageId) {
+    const stage = typeof getStage === 'function' ? getStage(dungeonId, stageId) : null;
+    if (!stage || !stage.unlock) return true;
+    const u = stage.unlock;
+    if (u.type === 'story') return typeof storySeen === 'function' && storySeen(u.id);
+    if (u.type === 'stageClear') return isStageCleared(u.dungeonId, u.stageId, u.mode || 'normal');
+    return true;
+}
+/** ダンジョンに1つでも入れるステージがあるか */
+function isDungeonUnlocked(dungeonId) {
+    const d = (typeof DUNGEON_DEFS !== 'undefined') ? DUNGEON_DEFS[dungeonId] : null;
+    return !!(d && d.stages.some(s => isNormalStageUnlocked(dungeonId, s.id)));
+}
 function isChallengeStageUnlocked(dungeonId, stageId) {
     const stage = typeof getStage === 'function' ? getStage(dungeonId, stageId) : null;
     if (!stage || !stage.challengeUnlock) return true;

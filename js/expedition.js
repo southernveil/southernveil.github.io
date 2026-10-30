@@ -7,7 +7,7 @@
  *  - 事後回復: 回復系スキルを使用回数を消費して自動使用（リザレクション→回復）。HP が POST_HEAL_THRESHOLD 未満の味方がいなくなるまで
  *  - 撤退プロトコルは「事後回復の後」に判定。満たせば無事帰還、満たさなければ次戦へ
  *  - 戦闘に勝てなければ全滅。ただし 15R 時間切れの判定負けは「時間切れ撤退」（生存して帰還・その戦闘の報酬なし）
- *  - ノーマルは全滅でも獲得済みSSを保持（ペナルティなし）。チャレンジは全滅で獲得物+入場料を遺骸として全ロスト
+ *  - ノーマルは全滅すると獲得済みSSが半分（P9.23.0）。チャレンジは全滅で獲得物+入場料を遺骸として全ロスト
  */
 function htmlToText(h) {
     return String(h).replace(/<[^>]*>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
@@ -318,6 +318,10 @@ function runExpedition(opts) {
     // チャレンジは撤退不可（撤退しないで固定）
     if (mode === 'challenge') protocol = { type: 'none', value: 0 };
     if (!RETREAT_PROTOCOLS[protocol.type]) return { ok: false, error: '撤退プロトコルが不正です' };
+    // P9.23.0 ノーマルの解放条件（物語の進み具合・前のエリアの踏破）。チャレンジもノーマルで行けるステージが前提
+    if (typeof isNormalStageUnlocked === 'function' && !isNormalStageUnlocked(dungeon.id, stage.id)) {
+        return { ok: false, error: 'まだ解放されていません（ギルドの依頼を進めてください）' };
+    }
     // チャレンジ解放条件
     if (mode === 'challenge' && stage.challengeUnlock && typeof isChallengeStageUnlocked === 'function') {
         if (!isChallengeStageUnlocked(dungeon.id, stage.id)) {
@@ -548,7 +552,12 @@ function runExpedition(opts) {
                 result.loot0 = result.loot;
                 result.loot = 0;
             } else {
-                L(`【全滅】ペナルティなし。獲得済みの ${result.loot} SS は持ち帰る`, 'bad');
+                // P9.23.0 ノーマルの全滅：それまでに稼いだ SS は半分（端数切り捨て）。失った分は消える
+                const kept = Math.floor(result.loot / 2);
+                result.halfLost = result.loot - kept;
+                L(`【全滅】獲得済みの ${result.loot} SS は半分になった（${kept} SS を持ち帰る・${result.halfLost} SS を失った）`, 'bad');
+                result.loot0 = result.loot;
+                result.loot = kept;
             }
         }
     } finally {

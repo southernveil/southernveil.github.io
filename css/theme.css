@@ -637,3 +637,10 @@ html[data-lang="en"] .sc-text{font-family:'Cormorant Garamond',var(--serif);font
 .home-card-arena .hc-go{background:var(--panel);color:var(--ink);box-shadow:0 2px 0 rgba(0,0,0,.45);}
 .home-card-arena .hc-title{font-size:20px;}
 html[data-lang="en"] .hc-title{letter-spacing:.08em;}
+.hq-side{display:flex;align-items:center;gap:8px;width:100%;margin-top:10px;padding:8px 10px;border:1px solid #5a0f1a;background:linear-gradient(90deg,rgba(120,16,40,.1),rgba(90,22,140,.08));cursor:pointer;text-align:left;font-family:inherit;color:var(--ink);}
+.hq-side:hover,.hq-side:focus-visible{background:linear-gradient(90deg,rgba(120,16,40,.18),rgba(90,22,140,.14));outline:none;}
+.hq-side-tag{flex:none;font-family:var(--serif);font-size:10px;font-weight:700;letter-spacing:.16em;color:#fff;background:#6b0f22;padding:2px 6px;}
+.hq-side-main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.hq-side-main b{font-size:13px;font-family:var(--serif);}
+.hq-side-main small{font-size:11px;color:var(--muted);}
+.hq-side-go{flex:none;color:#6b0f22;font-weight:700;}

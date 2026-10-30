@@ -40,15 +40,62 @@ const STORY_SCENES = {
         ['g', '今日はもう下がれ。次の仕事まで、しっかり体を休めておくことだ']
     ] },
     c1_remnant: { title: '残党の再調査', lines: [
-        ['g', '……休めたか。悪いが、もう次の仕事だ'],
+        ['g', 'お前たちに頼みたい仕事がある'],
         ['g', 'B2 で仕留めたはずの連中の残党が、迷宮の各層で目撃されている。数は少ないが、以前よりも手強いらしい。あの異常な質のシャードと、無関係とは思えない'],
-        ['g', 'もう一度潜って、確かめてこい。今度は条件が厳しい。全滅すれば、持ち込んだものは何も戻らない']
+        ['g', 'もう一度潜って、確かめてきてくれ。今度は条件が厳しい。全滅すれば、持ち込んだものは何も戻らない']
+    ] },
+    // ---- 第2章「還らずの森」（P9.23.0） ----
+    c2_start: { title: '還らずの森の捜索依頼', lines: [
+        ['g', '迷宮の件、ご苦労だった'],
+        ['g', 'さっそくだが、頼みたい仕事がある'],
+        ['g', '還らずの森に入った調査隊が、予定の日を過ぎても戻ってこない'],
+        ['g', '森はもともと危険な場所だ。多少の遅れなら珍しくもないが、今回は様子が違う'],
+        ['g', '調査隊には経験を積んだ冒険者もいた。何の連絡もないまま全員が行方知れずというのは、どうにも引っかかる'],
+        ['g', 'お前たちには、森に入って調査隊の足取りを追ってもらいたい'],
+        ['g', '無理はしないでくれ。何が起きているのか、まだ分からないからな']
+    ] },
+    c2_a1: { title: '残された足跡', lines: [
+        ['n', '森の入口付近で、調査隊が残したと思われる野営地と荷物を発見した。\n争った形跡は見当たらず、荷物も多くがそのまま残されていた。\n残された足跡は森の奥へと続いている。'],
+        ['g', 'なるほど。荷物を残して移動した、か'],
+        ['g', '魔物に襲われたのなら、争った跡の一つもあっていいはずだが……'],
+        ['g', '足跡が続いているなら、まだ追える。まずはそれをたどってみてくれ'],
+        ['g', '何か見つけたら、また知らせてくれ']
+    ] },
+    c2_a2: { title: '壊れた記録', lines: [
+        ['n', '森の奥で、調査隊が残した記録の一部を発見した。\n記録には、隊員たちの様子に異変が起こっていたと読み取れるような記述があった。\nしかし、記録は途中で途切れており、その後の状況は分からない。'],
+        ['g', '原因は分からないが、森の奥で何かが起きているのは間違いなさそうだ'],
+        ['g', '記録の続きが残っているかもしれない。もう少し奥を調べてきてくれ。……嫌な予感がする']
+    ] },
+    c2_a3: { title: '帰還者', lines: [
+        ['n', '森の奥で、行方不明となっていた調査隊の一員を発見した。\n生存していたものの、ひどく衰弱しており、まともな会話が成立しない。\nどうにか聞き取れた言葉は、断片的なものばかりだった。'],
+        ['n', '「……花じゃない」\n「逃げろって、言ったのに……」'],
+        ['n', '帰還者はそれ以上、まともに答えることができなかった。\n調査隊の残りの隊員については、依然として行方が分からない。'],
+        ['g', '生存者がいたのか……。だが、その様子では詳しい話を聞くのは難しいな'],
+        ['g', '何を見たのかは分からない。無理に聞き出そうとしても、今はどうにもならないだろう'],
+        ['g', 'ここまで来た以上、調査を打ち切るわけにはいかない'],
+        ['g', '足取りは、さらに森の奥へ続いているのだろう？'],
+        ['g', '頼む。奥に何があるのか、確かめてきてくれ']
+    ] },
+    c2_a4: { title: '森の最奥', lines: [
+        ['n', '森の最深部で、調査隊が残した装備と、異様な姿をした魔物を発見した。\n激しい戦闘の末、魔物を討伐。調査隊の行方を追う中で遭遇した脅威は、ひとまず排除された。'],
+        ['n', '討伐した魔物の身体には、一本の短剣が刺さっていた。\n冒険者たちが使う一般的な武器とは異なる意匠。その柄には、見慣れない紋章が刻まれている。\n短剣を回収してギルドへ持ち帰ることにした。'],
+        ['g', 'そうか……。森の奥には、そんな魔物がいたのか'],
+        ['g', 'よく戻った。これで森の調査はひとまず終わりだ'],
+        ['g', 'だが、行方不明になった者が全員見つかったわけではない。手放しで喜べる結果でもないな'],
+        ['g', '……ん？　この短剣は、あの魔物に刺さっていたのか'],
+        ['n', 'ガレオンは短剣を受け取り、柄に刻まれた紋章を確かめる。'],
+        ['g', '見慣れない紋章だな。少なくとも、俺にはすぐに心当たりが浮かばない'],
+        ['g', 'これは俺が預かろう。少し調べてみる'],
+        ['g', '何か分かれば知らせる。今は、お前たちも休んでくれ'],
+        ['g', '今回の依頼、ご苦労だった'],
+        ['n', '還らずの森での捜索依頼は完了した。\n森の奥に潜んでいた脅威は討伐されたものの、行方不明となった冒険者たちのすべてが見つかったわけではない。\nそして、討伐した魔物に刺さっていた、見慣れない紋章の短剣。\nその出所が明らかになることは、まだなかった。']
     ] }
 };
-const STORY_CHAPTERS = { 1: '第1章　はじまりの迷宮' };
+const STORY_CHAPTERS = { 1: '第1章　はじまりの迷宮', 2: '第2章　還らずの森' };
 const STORY_TIP_KEY = 'sv_tip_levelup_v1';
 
-const SC = { el: null, id: null, i: 0, replay: false, pageAt: 0, b2SeenThisSession: false, returnedSinceB2: false, busy: false };
+/** justSeen：この表示中（ページを開いてから）に見た場面。later の場面は、前の場面を見た直後には出さない（次に拠点を開いたとき／次の帰還で） */
+const SC = { el: null, id: null, i: 0, replay: false, pageAt: 0, justSeen: {}, busy: false };
 
 function storyIsOpen() { return !!(SC.el && document.body.contains(SC.el)); }
 
@@ -59,15 +106,24 @@ function storyIsOpen() { return !!(SC.el && document.body.contains(SC.el)); }
 function storyObjective() {
     if (typeof storySeen !== 'function' || !storySeen('c1_intro')) return null;
     const pend = storyPending();
-    if (pend) return { title: 'ギルドへ報告する', detail: 'ガレオンが話を待っている', scene: pend, goLabel: '報告する' };
-    const cl = (s, m) => isStageCleared('labyrinth', s, m || 'normal');
-    if (!storySeen('c1_f1')) return { title: 'はじまりの迷宮 F1 を調査せよ', detail: '上層で目撃された変異体の実態を調べる', go: "expGoTo('labyrinth','f1','normal')", goLabel: '出撃する' };
-    if (!storySeen('c1_b1')) return { title: 'B1 で巣穴を突き止めろ', detail: '変異体がどこから這い出しているのかを探る', go: "expGoTo('labyrinth','b1','normal')", goLabel: '出撃する' };
-    if (!storySeen('c1_b2')) return { title: 'B2 の上位変異体を討て', detail: '臨時の合同討伐作戦', go: "expGoTo('labyrinth','b2','normal')", goLabel: '出撃する' };
-    if (!storySeen('c1_remnant')) return { title: '体を休め、次の依頼を待て', detail: '次に拠点へ戻ったとき、ガレオンから話がある' };
-    const ch = ['f1', 'b1', 'b2'].find(s => !cl(s, 'challenge'));
-    if (ch) return { title: `迷宮の残党を調査せよ（チャレンジ ${ch.toUpperCase()}）`, detail: '全滅すると、入場料と持ち帰るはずの SS を失う', go: `expGoTo('labyrinth','${ch}','challenge')`, goLabel: '出撃する' };
-    return { title: '第1章 完', detail: '次の依頼を待て', done: true };
+    if (pend) { const d = storyStepDef(pend); return { title: 'ギルドへ報告する', detail: 'ガレオンが話を待っている', scene: pend, goLabel: '報告する', chapter: d ? d.chapter : 1 }; }
+    const wait = { title: '体を休め、次の依頼を待て', detail: '次に拠点へ戻ったとき、ガレオンから話がある', chapter: 1 };
+    let main;
+    if (!storySeen('c1_f1')) main = { title: 'はじまりの迷宮 F1 を調査せよ', detail: '上層で目撃された変異体の実態を調べる', go: "expGoTo('labyrinth','f1','normal')", goLabel: '出撃する', chapter: 1 };
+    else if (!storySeen('c1_b1')) main = { title: 'B1 で巣穴を突き止めろ', detail: '変異体がどこから這い出しているのかを探る', go: "expGoTo('labyrinth','b1','normal')", goLabel: '出撃する', chapter: 1 };
+    else if (!storySeen('c1_b2')) main = { title: 'B2 の上位変異体を討て', detail: '臨時の合同討伐作戦', go: "expGoTo('labyrinth','b2','normal')", goLabel: '出撃する', chapter: 1 };
+    else if (!storySeen('c2_start')) main = wait;
+    else if (!storySeen('c2_a1')) main = { title: '還らずの森 エリア1 を踏破する', detail: '行方知れずの調査隊の足取りを追う', go: "expGoTo('forest','a1','normal')", goLabel: '出撃する', chapter: 2 };
+    else if (!storySeen('c2_a2')) main = { title: '還らずの森 エリア2 を踏破する', detail: '森の奥へ続く足跡をたどる', go: "expGoTo('forest','a2','normal')", goLabel: '出撃する', chapter: 2 };
+    else if (!storySeen('c2_a3')) main = { title: '還らずの森 エリア3 を踏破する', detail: '途切れた記録の続きを探す', go: "expGoTo('forest','a3','normal')", goLabel: '出撃する', chapter: 2 };
+    else if (!storySeen('c2_a4')) main = { title: '還らずの森 エリア4 を踏破する', detail: '森の最奥に何があるのかを確かめる', go: "expGoTo('forest','a4','normal')", goLabel: '出撃する', chapter: 2 };
+    else main = { title: '第2章 完', detail: '次の依頼を待て', done: true, chapter: 2 };
+    // 寄り道：迷宮の残党（チャレンジ）。依頼を受けたあと、踏破していないものを1つ
+    if (storySeen('c1_remnant')) {
+        const ch = ['f1', 'b1', 'b2'].find(s => !isStageCleared('labyrinth', s, 'challenge'));
+        if (ch) main.side = { title: `迷宮の残党を調査せよ（チャレンジ ${ch.toUpperCase()}）`, detail: '全滅すると、入場料と持ち帰るはずの SS を失う', go: `expGoTo('labyrinth','${ch}','challenge')` };
+    }
+    return main;
 }
 
 /** いま見せてよい場面（順番どおりの最初の1つ。later は時間をおいてから） */
@@ -76,7 +132,7 @@ function storyPending() {
     for (const s of STORY_STEPS) {
         if (!storyCanSee(s.id)) continue;
         if (s.id === 'c1_intro') return null;   // 依頼は冒険者名の登録のあとにだけ（下の storyAfterName）
-        if (s.later && SC.b2SeenThisSession && !SC.returnedSinceB2) return null;
+        if (s.later && SC.justSeen[s.need]) continue;   // 前の場面を見た直後は出さない（ほかの場面は先に出してよい）
         return s.id;
     }
     return null;
@@ -110,7 +166,7 @@ function storyAfterName() {
 }
 /** 本番の帰還（結果画面を閉じた）あと */
 function storyAfterReturn() {
-    if (SC.b2SeenThisSession) SC.returnedSinceB2 = true;
+    SC.justSeen = {};   // 帰還したら「次の機会」
     setTimeout(() => { if (!storyCheck()) storyTipLevelUp(); }, 300);
 }
 
@@ -186,7 +242,7 @@ async function storyFinish() {
         }
     } catch (e) { console.warn(e); }
     SC.busy = false;
-    if (id === 'c1_b2') { SC.b2SeenThisSession = true; SC.returnedSinceB2 = false; }
+    SC.justSeen[id] = true;
     if (typeof currentScreen !== 'undefined' && currentScreen === 'home' && typeof renderHomeQuest === 'function') renderHomeQuest();
     setTimeout(() => { if (!storyCheck()) storyTipLevelUp(); }, 450);
 }
@@ -233,10 +289,11 @@ function renderHomeQuest() {
     box.innerHTML = `<div class="hq${q.done ? ' hq-done' : ''}">
         <img class="hq-face" src="img/npc/galeon-face.webp" alt="" decoding="async">
         <div class="hq-main">
-            <div class="hq-eyebrow"><span>ギルドの依頼</span>　<span>${esc(STORY_CHAPTERS[1])}</span></div>
+            <div class="hq-eyebrow"><span>ギルドの依頼</span>　<span>${esc(STORY_CHAPTERS[q.chapter || 1] || '')}</span></div>
             <div class="hq-title">${esc(q.title)}</div>
             ${q.detail ? `<div class="hq-detail">${esc(q.detail)}</div>` : ''}
             <div class="hq-btns">${act && q.goLabel ? `<button type="button" class="btn btn-sm hq-go" onclick="${act}">${esc(q.goLabel)}</button>` : ''}<button type="button" class="hq-log" onclick="storyLogOpen()">これまでの依頼</button></div>
+            ${q.side ? `<button type="button" class="hq-side" onclick="${q.side.go}"><span class="hq-side-tag">寄り道</span><span class="hq-side-main"><b>${esc(q.side.title)}</b><small>${esc(q.side.detail)}</small></span><span class="hq-side-go" aria-hidden="true">›</span></button>` : ''}
         </div></div>`;
 }
 

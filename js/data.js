@@ -482,7 +482,13 @@ const STORY_STEPS = [
     { id: 'c1_f1', chapter: 1, need: 'c1_intro', clear: 'labyrinth:f1:normal' },
     { id: 'c1_b1', chapter: 1, need: 'c1_f1', clear: 'labyrinth:b1:normal' },
     { id: 'c1_b2', chapter: 1, need: 'c1_b1', clear: 'labyrinth:b2:normal' },
-    { id: 'c1_remnant', chapter: 1, need: 'c1_b2', later: true }
+    // P9.23.0 第2章「還らずの森」。開始は第1章の結びの次の機会。森エリア1の踏破後、次の機会に迷宮の残党（チャレンジ）
+    { id: 'c2_start', chapter: 2, need: 'c1_b2', later: true },
+    { id: 'c2_a1', chapter: 2, need: 'c2_start', clear: 'forest:a1:normal' },
+    { id: 'c1_remnant', chapter: 1, need: 'c2_a1', later: true },
+    { id: 'c2_a2', chapter: 2, need: 'c2_a1', clear: 'forest:a2:normal' },
+    { id: 'c2_a3', chapter: 2, need: 'c2_a2', clear: 'forest:a3:normal' },
+    { id: 'c2_a4', chapter: 2, need: 'c2_a3', clear: 'forest:a4:normal' }
 ];
 function storyStepDef(id) { return STORY_STEPS.find(s => s.id === id) || null; }
 
@@ -868,7 +874,7 @@ const DEFAULT_UNLOCKED_CONDITIONS = [
 
 
 
-/** モード。ノーマル=ペナルティなし周回 / チャレンジ=入場料(デポジット)必須・全滅で全ロスト */
+/** モード。ノーマル=全滅で獲得SS半減 / チャレンジ=入場料(デポジット)必須・全滅で全ロスト */
 const MODE_DEFS = {
     normal:    { id: 'normal',    name: '周回（ノーマル）',   rewardMult: 1.0, needDeposit: false, purity: '通常' },
     // challenge の rewardMult は使わない（ステージ別 challengeSsPerEnemy を使用）
@@ -960,7 +966,8 @@ const DUNGEON_DEFS = {
         Object.assign(S('f1', 'F1', [1, 3], [2, 2], 3, 10, 60), {
             challengeLv: [12, 14], challengeSize: [3, 3], challengeSsPerEnemy: 20,
             challengePool: CH_POOL.slice(),
-            challengeUnlock: { type: 'stageClear', dungeonId: 'labyrinth', stageId: 'b2', mode: 'normal' }
+            // P9.23.0 チャレンジは森エリア1の踏破で解放（第2章の途中で「残党の再調査」）
+            challengeUnlock: { type: 'stageClear', dungeonId: 'forest', stageId: 'a1', mode: 'normal' }
         }),
         Object.assign(S('b1', 'B1', [4, 6], [2, 2], 3, 12, 80), {
             challengeLv: [15, 17], challengeSize: [3, 3], challengeSsPerEnemy: 24,
@@ -975,11 +982,13 @@ const DUNGEON_DEFS = {
         })
     ];
     // 還らずの森（敵数3・バトル数3）
+    // P9.23.0 ノーマルの解放：エリア1は第2章の依頼を受けたら、以降は前のエリアの踏破で
+    const FU = (st) => ({ type: 'stageClear', dungeonId: 'forest', stageId: st, mode: 'normal' });
     DUNGEON_DEFS.forest.stages = [
-        S('a1', 'エリア1', [10, 12], [3, 3], 3, 16, 200),
-        S('a2', 'エリア2', [13, 15], [3, 3], 3, 18, 250),
-        S('a3', 'エリア3', [16, 18], [3, 3], 3, 20, 300),
-        S('a4', 'エリア4', [19, 20], [3, 3], 3, 22, 350, ['boss_mother', 'venom_bloom', 'rot_dancer'])
+        Object.assign(S('a1', 'エリア1', [10, 12], [3, 3], 3, 16, 200), { unlock: { type: 'story', id: 'c2_start' } }),
+        Object.assign(S('a2', 'エリア2', [13, 15], [3, 3], 3, 18, 250), { unlock: FU('a1') }),
+        Object.assign(S('a3', 'エリア3', [16, 18], [3, 3], 3, 20, 300), { unlock: FU('a2') }),
+        Object.assign(S('a4', 'エリア4', [19, 20], [3, 3], 3, 22, 350, ['boss_mother', 'venom_bloom', 'rot_dancer']), { unlock: FU('a3') })
     ];
     // 骸道の都ルメルク（SS/入場料は未確定 → 0。敵Lv帯のみ従来踏襲）
     const lvs = [[21, 24], [25, 28], [29, 32], [33, 36], [37, 40], [41, 44], [45, 48], [49, 52], [53, 56]];

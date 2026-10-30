@@ -291,7 +291,7 @@ function expUpdateRunButtons() {
     const busy = (typeof batchRunning !== 'undefined' && batchRunning);
     const dry = expDryChecked();
     const left = dry ? 0 : expCooldownRemaining();
-    const empty = expPartyEmpty();
+    const empty = expPartyEmpty() || (typeof expStageLocked === 'function' && expStageLocked());
     const tag = dry ? '（テスト）' : (left > 0 ? `（あと${expFmtWait(left)}）` : '');
     const b1 = document.getElementById('exp-run'), b10 = document.getElementById('exp-run10');
     if (b1) { b1.disabled = busy || empty || left > 0; b1.textContent = '出撃' + tag; b1.classList.toggle('exp-dry-btn', dry); }
@@ -387,6 +387,7 @@ function settleNotes(run, dry) {
     if (run.retired && run.retired.length) notes.push('引退：' + run.retired.join('、'));
     if (run.corpse) notes.push(`遺骸を残置：獲得 ${run.corpse.lootLost} SS と入場料 ${run.corpse.depositLost} をロスト`);
     else if (run.depositRefunded) notes.push(`入場料 ${run.depositRefunded} は返却`);
+    if (run.halfLost) notes.push(`全滅したため、稼いだ SS が半分になった（−${run.halfLost} SS）`);
     (run.drops || []).forEach(d => notes.push('入手：' + d));
     return notes;
 }
@@ -408,6 +409,7 @@ function settleSingleHtml(run, dry, gate) {
     if (run.poolClaimed) rows += `<div class="settle-row"><span>失敗プール受取</span><span class="settle-r"></span><span class="settle-v">+${expFmt(run.poolClaimed)}</span></div>`;
     if (run.soldSs) rows += `<div class="settle-row"><span>アクセサリーの自動売却</span><span class="settle-r"></span><span class="settle-v">+${expFmt(run.soldSs)}</span></div>`;
     if (run.corpse && run.corpse.lootLost) rows += `<div class="settle-row lost"><span>全滅によりロスト</span><span class="settle-r"></span><span class="settle-v">−${expFmt(run.corpse.lootLost)}</span></div>`;
+    if (run.halfLost) rows += `<div class="settle-row lost"><span>全滅により半減</span><span class="settle-r"></span><span class="settle-v">−${expFmt(run.halfLost)}</span></div>`;
     rows += `<div class="settle-row total"><span>合計</span><span class="settle-r"></span><span class="settle-v">${amount ? '+' + expFmt(amount) : '0'}</span></div>`;
     return settleShell({
         cls: run.status, dry, gate, amount, rows, notes: settleNotes(run, dry),
@@ -427,6 +429,8 @@ function settleBatchHtml(b, dry, gate) {
     if (dry) notes.push('テスト実行のため、SS・寿命・入手物は実際には変わりません');
     if (b.stopReason) notes.push('停止：' + b.stopReason);
     if (b.depositLost) notes.push(`入場料 ${b.depositLost} をロスト（全滅分）`);
+    const halfLost = b.runs.reduce((t, r) => t + (r.halfLost | 0), 0);
+    if (halfLost) notes.push(`全滅による半減 −${halfLost} SS`);
     const ret = []; b.runs.forEach(r => (r.retired || []).forEach(n => ret.push(n)));
     if (ret.length) notes.push('引退：' + ret.join('、'));
     const dropCount = {};

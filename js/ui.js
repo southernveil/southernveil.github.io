@@ -704,6 +704,14 @@ function initExpeditionScreen() {
         onExpProtoChange();
     }
     if (typeof expDryChecked === 'function') expDryChecked();   // 一般のプレイヤーにはテスト実行を出さない
+    // P9.23.0 まだ入れないダンジョンには「🔒」
+    [...dsel.options].forEach(o => {
+        const dd = DUNGEON_DEFS[o.value];
+        if (!dd) return;
+        const lock = typeof isDungeonUnlocked === 'function' && !isDungeonUnlocked(o.value);
+        const label = `${dd.name}（${dd.tag}）${lock ? '　🔒' : ''}`;
+        if (o.textContent !== label) o.textContent = label;
+    });
     renderExpInfo();
 }
 
@@ -790,7 +798,8 @@ function expProtoHelp() {
         else if (pr.type === 'healLeft') t = t_('戦闘のあと、ヒール系アクションの残り回数（全員の合計）が {n} 回以下なら基地へ引き返す', pr.value);
         else if (pr.type === 'avgHp') t = t_('戦闘のあと、パーティの平均HP（倒れた仲間は0%）が {n}% 以下なら基地へ引き返す', pr.value);
         else t = '条件を付けず、最後の戦闘まで進む';
-        if (pr.type !== 'none') t += '。引き返すと、それまでの SS を持って無事に帰還します';
+        if (pr.type !== 'none') t += '。引き返せば稼いだ SS はそのまま、全滅すると半分になります';
+        else t += '。全滅すると、稼いだ SS は半分になります';
     }
     if (box.dataset.v !== t) { box.dataset.v = t; box.textContent = t; }
 }
@@ -842,7 +851,7 @@ function renderExpInfo() {
         `撃破 ${ssEach} SS/体（${md.purity}）`
     ];
     if (md.needDeposit) parts.push(`入場料 ${st.deposit}（全滅でロスト）`);
-    else parts.push('ペナルティなし');
+    else parts.push('全滅すると稼いだ SS が半分');
     if (mode === 'challenge') {
         parts.push('撤退不可・時間切れは全滅');
         if (typeof isChallengeStageUnlocked === 'function' && !isChallengeStageUnlocked(d.id, st.id)) {
@@ -859,6 +868,10 @@ function renderExpInfo() {
     }
     if (env.labels.length) parts.push('環境: ' + env.labels.join(' / '));
     let warn = '';
+    // P9.23.0 まだ解放されていないステージ（物語の進み具合・前のエリア）
+    const locked = (typeof isNormalStageUnlocked === 'function' && !isNormalStageUnlocked(d.id, st.id))
+        || (mode === 'challenge' && typeof isChallengeStageUnlocked === 'function' && !isChallengeStageUnlocked(d.id, st.id));
+    if (locked) warn += `<br><span class="meta exp-locked">${esc(expLockReason(d.id, st.id, mode))}</span>`;
     if (mode === 'challenge') {
         warn = '<br><span class="meta" style="color:#b3261e;">注意: 時間切れ・全滅で獲得SSと入場料を失い、寿命が全員−2されます</span>';
     }
@@ -873,6 +886,27 @@ function renderExpInfo() {
         + `<br><span class="meta">パーティ: ${esc(partyNow.map(c => c.name + ' Lv' + (c.level || 1)).join('、') || '（空）')}　所持 SS: ${getResource()}</span>`
         + emptyNote;
     if (typeof expUpdateRunButtons === 'function') expUpdateRunButtons();
+}
+/** 選んでいるステージ・モードがまだ解放されていないか */
+function expStageLocked() {
+    const ds = document.getElementById('exp-dungeon'), ss = document.getElementById('exp-stage'), ms = document.getElementById('exp-mode');
+    if (!ds || !ss || !ds.value || !ss.value) return false;
+    if (typeof isNormalStageUnlocked === 'function' && !isNormalStageUnlocked(ds.value, ss.value)) return true;
+    return !!(ms && ms.value === 'challenge' && typeof isChallengeStageUnlocked === 'function' && !isChallengeStageUnlocked(ds.value, ss.value));
+}
+/** P9.23.0 なぜ出撃できないかを1文で */
+function expLockReason(dId, sId, mode) {
+    const st = getStage(dId, sId);
+    if (st && typeof isNormalStageUnlocked === 'function' && !isNormalStageUnlocked(dId, sId)) {
+        const u = st.unlock || {};
+        if (u.type === 'story') return '🔒 ギルドの依頼を進めると解放されます';
+        if (u.type === 'stageClear') { const s2 = getStage(u.dungeonId, u.stageId); return `🔒 ${(DUNGEON_DEFS[u.dungeonId] || {}).name || ''} ${s2 ? s2.name : ''} を踏破すると解放されます`; }
+    }
+    if (mode === 'challenge' && st && st.challengeUnlock) {
+        const u = st.challengeUnlock; const s2 = getStage(u.dungeonId, u.stageId);
+        return `🔒 ${(DUNGEON_DEFS[u.dungeonId] || {}).name || ''} ${s2 ? s2.name : ''}（${u.mode === 'challenge' ? 'チャレンジ' : 'ノーマル'}）を踏破すると解放されます`;
+    }
+    return '🔒 まだ解放されていません';
 }
 
 
@@ -1396,7 +1430,7 @@ function homeGoals() {
     let normalGoal = null, challengeGoal = null;
     // P9.22.0 迷宮の進め方は「ギルドの依頼」が示すので、ここでは出さない（依頼が終わったら従来どおり）
     const quest = (typeof storyObjective === 'function') ? storyObjective() : null;
-    const questOwns = d => d === 'labyrinth' && quest && !quest.done;
+    const questOwns = d => (d === 'labyrinth' || d === 'forest') && quest && !quest.done;
     Object.keys(DUNGEON_DEFS).forEach(d => {
         if (!isContentPublic(d, 'normal') || questOwns(d)) return;
         (DUNGEON_DEFS[d].stages || []).forEach(s => {
@@ -1468,6 +1502,7 @@ function expRefreshStageLabels(d, mode) {
         const boss = mode === 'challenge' ? (Array.isArray(s.challengeBoss) && s.challengeBoss.length) || !!s.boss : !!s.boss;
         let mark = '';
         if (typeof isStageCleared === 'function' && isStageCleared(d.id, s.id, mode)) mark = '　✓踏破済';
+        else if (typeof isNormalStageUnlocked === 'function' && !isNormalStageUnlocked(d.id, s.id)) mark = '　🔒未解放';
         else if (mode === 'challenge' && typeof isChallengeStageUnlocked === 'function' && !isChallengeStageUnlocked(d.id, s.id)) mark = '　🔒未解放';
         o.textContent = `${s.name}（Lv${lv[0]}〜${lv[1]}${boss ? '・ボス' : ''}）${mark}`;
     });
