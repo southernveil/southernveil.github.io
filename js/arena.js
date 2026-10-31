@@ -43,17 +43,18 @@ function arenaRender() {
     const box = document.getElementById('arena-body');
     if (!box) return;
     const d = arenaState.data;
-    if (!d) { box.innerHTML = `<div class="hint">${esc(arenaState.error || '読み込み中…')}</div>`; return; }
+    const duo = (typeof duoCardHtml === 'function') ? duoCardHtml() : '';   // P9.24.0 イベントバトル（闘技場の集計とは別）
+    if (!d) { box.innerHTML = duo + `<div class="hint">${esc(arenaState.error || '読み込み中…')}</div>`; return; }
     const now = Date.now();
     const skew = now - (d.now || now);   // サーバーとの時計のずれ
     const next = d.nextDeadline + skew;
     const me = d.me;
     const name = (typeof serverState !== 'undefined' && serverState.meta && serverState.meta.playerName) || '';
-    let html = '';
+    let html = duo;
 
     // 自分
     if (me) {
-        html += `<div class="ar-me"><div class="ar-me-name">${esc(me.name)}</div>
+        html += `<div class="ar-me"><div class="ar-me-name">${titledNameHtml(me.name)}</div>
             <div class="ar-me-row"><div class="ar-mmr"><span>MMR</span><b>${me.mmr}</b></div>
             <div class="ar-rank"><span>順位</span><b>${me.rank ? me.rank + '<small> / ' + d.total + '</small>' : '—'}</b></div>
             <div class="ar-rec"><span>通算</span><b>${me.wins}<small>勝</small> ${me.losses}<small>敗</small></b></div></div>
@@ -96,13 +97,13 @@ function arenaRender() {
         html += `<h3>直近の対戦</h3>`;
         html += (d.recent && d.recent.length) ? `<div class="ar-matches">` + d.recent.slice(0, 8).map(m => {
             const res = m.status !== 'done' ? '<span class="ar-res pend">待</span>' : (m.win ? '<span class="ar-res win">勝</span>' : '<span class="ar-res lose">敗</span>');
-            return `<div class="ar-match">${res}<div class="ar-match-main"><div><b>${esc(m.opp.name)}</b> <span class="meta">${esc(arenaFmtDateTime(Number(m.cycle_id) + skew))}${m.reason ? '・' + esc(m.reason) : ''}</span></div>${arenaTeamHtml(m.opp.team)}</div>
+            return `<div class="ar-match">${res}<div class="ar-match-main"><div><b>${titledNameHtml(m.opp.name)}</b> <span class="meta">${esc(arenaFmtDateTime(Number(m.cycle_id) + skew))}${m.reason ? '・' + esc(m.reason) : ''}</span></div>${arenaTeamHtml(m.opp.team)}</div>
                 ${m.status === 'done' ? `<button type="button" class="btn btn-sm btn-blue" onclick="arenaOpenLog(${m.id | 0})">ログ</button>` : ''}</div>`;
         }).join('') + `</div>` : '<div class="hint">まだ対戦はありません</div>';
     }
 
     // ランキング
-    const row = p => `<tr class="${me && p.author === me.author ? 'me' : ''}"><td class="ar-mono">${p.rank}</td><td>${esc(p.name)}</td><td class="ar-mono">${p.mmr}</td><td class="ar-mono">${p.wins}-${p.losses}</td></tr>`;
+    const row = p => `<tr class="${me && p.author === me.author ? 'me' : ''}"><td class="ar-mono">${p.rank}</td><td>${titledNameHtml(p.name)}</td><td class="ar-mono">${p.mmr}</td><td class="ar-mono">${p.wins}-${p.losses}</td></tr>`;
     html += `<h3>ランキング <span class="meta">（${d.total}人）</span></h3>`;
     if (d.ranked && d.ranked.length) {
         html += `<table class="ar-rank-table"><thead><tr><th>順位</th><th>冒険者</th><th>MMR</th><th>勝-敗</th></tr></thead><tbody>${d.ranked.map(row).join('')}`
@@ -142,21 +143,33 @@ function arenaLogRender() {
     const box = document.getElementById('arena-log-body');
     const L = arenaState.log, r = L.data;
     const mine = r.mySide === 'A' ? 'a' : (r.mySide === 'B' ? 'b' : null);
-    const side = (k, s) => `<div class="ar-side ${r.winner === k ? 'won' : ''}"><div class="ar-side-name">${esc(s.name)}${mine === k ? '<small>（あなた）</small>' : ''}${r.winner === k ? '<span class="ar-res win">勝</span>' : ''}</div>${arenaTeamHtml(s.team)}</div>`;
+    const side = (k, s) => `<div class="ar-side ${r.winner === k ? 'won' : ''}"><div class="ar-side-name">${titledNameHtml(s.name)}${mine === k ? '<small>（あなた）</small>' : ''}${r.winner === k ? '<span class="ar-res win">勝</span>' : ''}</div>${arenaTeamHtml(s.team)}</div>`;
     let body = '';
     if (!r.log) body = `<div class="hint">${esc(r.note || 'ログはありません')}</div>`;
     else {
         if (!r.engineSame) body += `<div class="ar-warn">この対戦のあとで戦闘エンジンが更新されたため、ログは当時と異なる場合があります${r.resultSame ? '' : '（勝敗は記録どおりです）'}</div>`;
-        if (L.view === 'table') body += formatStructuredTableHtml(r.log);
+        const rows = r.log.filter(e => !e.x);   // x: ビューア用の行（毒・行動できない）
+        if (L.view === 'table') body += formatStructuredTableHtml(rows);
         else {
             const allies = (r.sides && (r.mySide ? r.sides[r.mySide] : r.sides.A)) || [];
-            body += `<div class="exp-log ar-log-story">` + narrateBattleRounds({ structured: r.log }, { partyNames: allies }).map(x => `<div class="n-block">${x}</div>`).join('') + `</div>`;
+            body += `<div class="exp-log ar-log-story">` + narrateBattleRounds({ structured: rows }, { partyNames: allies }).map(x => `<div class="n-block">${x}</div>`).join('') + `</div>`;
         }
     }
     box.innerHTML = `<div class="gate-eyebrow">闘技場の対戦</div>
         <div class="ar-sides">${side('a', r.a)}<div class="ar-vs">VS</div>${side('b', r.b)}</div>
         <div class="ar-log-meta">${esc(r.reason || '')}${r.rounds ? '・' + r.rounds + 'R' : ''}</div>
+        ${r.log && r.units && typeof bvOpen === 'function' ? `<button type="button" class="btn btn-sm ar-log-bv" onclick="arenaOpenViewer()">▶ バトルを見る</button>` : ''}
         <div class="ar-log-tabs"><button type="button" class="speed-btn${L.view !== 'table' ? ' active' : ''}" onclick="arenaLogView('story')">簡易表示</button><button type="button" class="speed-btn${L.view === 'table' ? ' active' : ''}" onclick="arenaLogView('table')">詳細表示</button></div>
         <div class="ar-log-box">${body}</div>
         <button type="button" class="btn ar-log-close" onclick="arenaLogClose()">閉じる</button>`;
+}
+
+/** P9.24.0 対戦ログをバトルビューアで再生 */
+function arenaOpenViewer() {
+    const L = arenaState.log;
+    if (!L || !L.data || !L.data.log) return;
+    const r = L.data;
+    const mine = r.mySide === 'B' ? 'b' : 'a';
+    bvOpen({ units: r.units, log: r.log, mySide: r.mySide || 'A', title: '闘技場の対戦', win: r.winner === mine, rounds: r.rounds,
+        sideNames: { A: r.a.name, B: r.b.name }, closeLabel: '閉じる' });
 }

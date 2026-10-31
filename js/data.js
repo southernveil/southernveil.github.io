@@ -479,17 +479,77 @@ function getClassDef(classId) {
  */
 const STORY_STEPS = [
     { id: 'c1_intro', chapter: 1, need: null },
-    { id: 'c1_f1', chapter: 1, need: 'c1_intro', clear: 'labyrinth:f1:normal' },
-    { id: 'c1_b1', chapter: 1, need: 'c1_f1', clear: 'labyrinth:b1:normal' },
-    { id: 'c1_b2', chapter: 1, need: 'c1_b1', clear: 'labyrinth:b2:normal' },
+    { id: 'c1_f1', chapter: 1, need: 'c1_intro', clear: 'labyrinth:f1:normal', reward: 50 },
+    { id: 'c1_b1', chapter: 1, need: 'c1_f1', clear: 'labyrinth:b1:normal', reward: 50 },
+    { id: 'c1_b2', chapter: 1, need: 'c1_b1', clear: 'labyrinth:b2:normal', reward: 100 },
     // P9.23.0 第2章「還らずの森」。開始は第1章の結びの次の機会。森エリア1の踏破後、次の機会に迷宮の残党（チャレンジ）
     { id: 'c2_start', chapter: 2, need: 'c1_b2', later: true },
-    { id: 'c2_a1', chapter: 2, need: 'c2_start', clear: 'forest:a1:normal' },
+    { id: 'c2_a1', chapter: 2, need: 'c2_start', clear: 'forest:a1:normal', reward: 50 },
     { id: 'c1_remnant', chapter: 1, need: 'c2_a1', later: true },
-    { id: 'c2_a2', chapter: 2, need: 'c2_a1', clear: 'forest:a2:normal' },
-    { id: 'c2_a3', chapter: 2, need: 'c2_a2', clear: 'forest:a3:normal' },
-    { id: 'c2_a4', chapter: 2, need: 'c2_a3', clear: 'forest:a4:normal' }
+    { id: 'c2_a2', chapter: 2, need: 'c2_a1', clear: 'forest:a2:normal', reward: 50 },
+    { id: 'c2_a3', chapter: 2, need: 'c2_a2', clear: 'forest:a3:normal', reward: 50 },
+    // P9.24.0 イベント「ギルドでの再会」（ミハルとクラウス）。森エリア3の報告のあと、次の機会に拠点で
+    { id: 'ev_duo1', chapter: 2, need: 'c2_a3', later: true, event: true },
+    { id: 'c2_a4', chapter: 2, need: 'c2_a3', clear: 'forest:a4:normal', reward: 100 }
 ];
+/** P9.24.0 寄り道（迷宮の残党：チャレンジ F1・B1・B2 をすべて踏破）の報酬。1回だけ。総獲得SSには数えない */
+const QUEST_SIDE_REWARD = 150;
+const QUEST_SIDE_STAGES = ['labyrinth:f1:challenge', 'labyrinth:b1:challenge', 'labyrinth:b2:challenge'];
+
+/* ---- P9.24.0 称号（冒険者名の前に【】で付く。名前の文字数には数えない）---- */
+const TITLE_DEFS = { twinstar: { name: '双星を越えし者' } };
+function titleNameOf(id) { return (id && TITLE_DEFS[id]) ? TITLE_DEFS[id].name : ''; }
+/** 表示名（称号つき）。meta はサーバー側のアカウント情報（playerName / title） */
+function playerDisplayName(meta) {
+    if (!meta || typeof meta.playerName !== 'string' || !meta.playerName) return '';
+    const t = titleNameOf(meta.title);
+    return (t ? '【' + t + '】' : '') + meta.playerName;
+}
+
+/* ---- P9.24.0 イベントバトル「最強コンビ」ミハル＆クラウス（闘技場）----
+ * 何度でも・ペナルティなし（寿命・SS・MMR は変わらない）。相手はパーティA。
+ * ルールは文字列で書き、読み込むときに条件・対象・アクションの番号に直す。acts は戦闘ログでの技名（専用名）
+ */
+const DUO_EVENT = {
+    need: 'ev_duo1', title: 'twinstar', rowLimit: 4,
+    units: [
+        { key: 'mihal', name: 'ミハル', classId: 'samurai', level: 50, classHistory: ['warrior', 'paladin', 'samurai'],
+            stats: { maxHp: 237, maxMp: 0, atk: 120, def: 38, int: 72, mnd: 69, agi: 70, dex: 77 },
+            rules: [
+                ['自身のHPが30%以下', '敵: HP最高', 'リベンジブロウ'],
+                ['自身のHPが50%以下', '敵: HP最高', '居合一閃'],
+                ['自身のHPが80%以下', '敵: HP最高', 'ダブルアタック'],
+                ['常に', '自分自身', 'ガードアップ']
+            ],
+            acts: { 'リベンジブロウ': '日輪月蝕流 奥ノ型・天ノ逆鉾', '居合一閃': '日輪月蝕流 参ノ型・煌月天照', 'ダブルアタック': '日輪月蝕流 壱ノ型・双月連斬', 'ガードアップ': '日輪月蝕流 弐ノ型・陽炎' } },
+        { key: 'klaus', name: 'クラウス', classId: 'high_priest', level: 50, classHistory: ['cleric', 'priest_sun', 'high_priest'],
+            stats: { maxHp: 218, maxMp: 0, atk: 63, def: 40, int: 83, mnd: 125, agi: 78, dex: 83 },
+            rules: [
+                ['味方のHPが30%以下', '味方: HP最低', 'グレートヒール'],
+                ['味方のHPが50%以下', '味方: HP最低', 'ヒール'],
+                ['味方が状態異常(毒・麻痺・睡眠)', '味方: 状態異常(毒・麻痺・睡眠)', 'リカバリー'],
+                ['常に', '敵: HP最低', 'セイントストライク']
+            ],
+            acts: { 'グレートヒール': '聖王の大慈悲', 'ヒール': '聖母の抱擁', 'リカバリー': '原罪洗礼', 'セイントストライク': 'ランス・オブ・ジャッジメント' } }
+    ]
+};
+/** 対戦用のデータ（pvpBattle にそのまま渡せる形） */
+function duoSnapshot() {
+    return { v: 1, name: 'ミハル＆クラウス', rowLimit: DUO_EVENT.rowLimit, units: DUO_EVENT.units.map(u => {
+        const all = skillsForClass(u.classId, u.level);
+        return {
+            name: u.name, classId: u.classId, level: u.level, classHistory: u.classHistory.slice(), portrait: 'npc:' + u.key,
+            stats: Object.assign({ poisonResist: 0, paralysisResist: 0, sleepResist: 0 }, u.stats),
+            skills: all.map(s => s.id),
+            rules: u.rules.map(r => ({ active: true, cond: conditions.indexOf(r[0]), tgt: targets.indexOf(r[1]), skill: all.findIndex(s => s.name === r[2]) }))
+        };
+    }) };
+}
+/** 戦闘ログの技名を専用名に（name: ユニット名、action: 元の技名） */
+function duoActName(name, action) {
+    const u = DUO_EVENT.units.find(x => x.name === name);
+    return (u && u.acts[action]) || action;
+}
 function storyStepDef(id) { return STORY_STEPS.find(s => s.id === id) || null; }
 
 /**

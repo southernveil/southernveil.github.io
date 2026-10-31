@@ -1238,6 +1238,7 @@ function renderAdShop() {
         const nm = (typeof serverState !== 'undefined' && serverState.meta && serverState.meta.playerName) || '';
         const canChange = !nm || st.points >= PLAYER_NAME_COST;
         nameRow = `<h3 style="margin-top:14px;">冒険者名</h3><div class="unlock-row"><div class="unlock-main"><div class="unlock-title">${nm ? esc(nm) : '未設定'}</div>
+            ${serverState.meta && serverState.meta.title && titleNameOf(serverState.meta.title) ? `<div class="hint">称号 ${titledNameHtml('【' + titleNameOf(serverState.meta.title) + '】' + ' ').trim()}（名前の前に表示されます。文字数には数えません）</div>` : ''}
             <div class="hint">${nm ? '名前を変えるには ' + PLAYER_NAME_COST + ' ' + esc(AD_POINT_NAME) + 'が必要です（最大' + PLAYER_NAME_MAX + '文字）' : '最初の設定は無料です（最大' + PLAYER_NAME_MAX + '文字）'}</div></div>
             <div class="unlock-actions"><button type="button" class="btn btn-sm btn-blue" ${canChange ? '' : 'disabled'} onclick="onSetPlayerName()">${nm ? PLAYER_NAME_COST + ' ' + esc(AD_POINT_NAME) + 'で変更' : '名前をつける'}</button></div></div>`;
     }
@@ -1254,6 +1255,7 @@ async function onSetPlayerName() {
     const cur = (serverState.meta && serverState.meta.playerName) || '';
     const v = prompt(cur ? '新しい冒険者名（' + PLAYER_NAME_COST + ' ' + AD_POINT_NAME + 'を使います）' : '冒険者名を入力してください', cur);
     if (v == null) return;
+    if (/[【】]/.test(v)) { alert('【】は称号用のため、名前には使えません'); return; }
     const r = await serverAct('set_player_name', { name: v });
     if (r && r.ok && typeof fxToast === 'function') fxToast('<b>冒険者名：' + esc(r.result.name) + '</b>' + (r.result.cost ? '<span>' + esc(AD_POINT_NAME) + ' −' + r.result.cost + '</span>' : ''), { tone: 'gold', sound: 'chime', key: 'pname' });
 }
@@ -1284,6 +1286,7 @@ async function pnameSubmit() {
     const inp = document.getElementById('pname-input'), err = document.getElementById('pname-err'), btn = document.getElementById('pname-ok');
     const v = String(inp && inp.value || '').trim();
     if (!v) { if (err) err.textContent = '名前を入力してください'; return; }
+    if (/[【】]/.test(v)) { if (err) err.textContent = (typeof T === 'function' ? T('【】は称号用のため、名前には使えません') : '【】は称号用のため、名前には使えません'); return; }
     if (btn) btn.disabled = true;
     const r = await serverCall('set_player_name', { name: v });
     if (btn) btn.disabled = false;
@@ -1294,11 +1297,20 @@ async function pnameSubmit() {
     // P9.22.0 名前の登録に続けて、ギルドマスターからの最初の依頼
     if (typeof storyAfterName === 'function') storyAfterName();
 }
+/** P9.24.0 称号つきの名前を HTML に。名前には【】を使えないので、先頭の【…】は必ず称号 */
+function titledNameHtml(s) {
+    const m = /^【([^【】]+)】(.+)$/.exec(String(s == null ? '' : s));
+    if (!m) return esc(s == null ? '' : s);
+    const t = (typeof T === 'function') ? T(m[1]) : m[1];
+    return `<span class="ttl" data-no-i18n>【${esc(t)}】</span>${esc(m[2])}`;
+}
+/** 自分の表示名（称号つき） */
+function myTitledName() { return (typeof serverState !== 'undefined' && serverState.meta && typeof playerDisplayName === 'function') ? playerDisplayName(serverState.meta) : ''; }
 function renderHomePlayer() {
     const el = document.getElementById('home-player');
     if (!el) return;
     const nm = (typeof serverState !== 'undefined' && serverState.meta && serverState.meta.playerName) || '';
-    el.innerHTML = nm ? `冒険者　<b>${esc(nm)}</b>` : '';
+    el.innerHTML = nm ? `冒険者　<b>${titledNameHtml(myTitledName() || nm)}</b>` : '';
 }
 async function onClaimAdPoint() {
     const r = await claimAdPointFlow();

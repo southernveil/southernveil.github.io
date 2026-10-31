@@ -1097,8 +1097,22 @@ function storyCanSee(id) {
 function storyMarkSeen(id) {
     if (!storyCanSee(id)) return { ok: false, reason: 'まだこの話は見られません' };
     accountUnlocks.story.push(id);
+    // P9.24.0 依頼の報酬（総獲得SSには数えない）
+    const d = storyStepDef(id);
+    const reward = (d && d.reward > 0) ? d.reward : 0;
+    if (reward) addResource(reward, { noEarn: true });
+    const side = questSideCheck();
     if (typeof persist === 'function') persist();
-    return { ok: true };
+    return { ok: true, reward: reward, side: side };
+}
+/** P9.24.0 寄り道（迷宮の残党）の報酬：依頼を受けていて、チャレンジ3つをすべて踏破していれば1回だけ。受け取った額（なければ 0） */
+function questSideCheck() {
+    ensureAccountUnlocksShape();
+    if (accountUnlocks.questSide || !storySeen('c1_remnant')) return 0;
+    if (!QUEST_SIDE_STAGES.every(k => { const a = k.split(':'); return isStageCleared(a[0], a[1], a[2]); })) return 0;
+    accountUnlocks.questSide = true;
+    addResource(QUEST_SIDE_REWARD, { noEarn: true });
+    return QUEST_SIDE_REWARD;
 }
 
 /** 明示リストがある場合、初期解放項目が欠けていれば補完する */

@@ -334,6 +334,20 @@ function runBattleCore(opts) {
         });
     }
 
+    // P9.24.0 バトルビューア用：行動ごとの HP と状態異常の写し（opts.snap のときだけ）
+    const snapOn = !!opts.snap;
+    const snapHp = () => {
+        const hp = {}, st = {};
+        Object.keys(runtime).forEach(id => {
+            const r = runtime[id], e = r.effects;
+            hp[id] = r.down ? 0 : r.hp;
+            const f = (e.poison > 0 ? 'p' : '') + (e.paralysis > 0 ? 'z' : '') + (e.sleep > 0 ? 's' : '');
+            if (f) st[id] = f;
+        });
+        return { hp: hp, st: st };
+    };
+    const snapMark = (aid) => { if (!snapOn || !structuredLog.length) return; Object.assign(structuredLog[structuredLog.length - 1], snapHp(), { aid: aid }); };
+    const snapEvent = (round, aid, kind, val) => { if (snapOn) structuredLog.push(Object.assign({ round: round, turn: 0, actor: charMeta[aid].name, action: '', target: '', dice: '', val: val || '', status: '', trigger: '', x: kind, aid: aid }, snapHp())); };
     let round = 1;
     let lastRound = 0;
     const maxRounds = 15;
@@ -488,18 +502,18 @@ function runBattleCore(opts) {
 
             if (runtime[unit.id].effects.skipTurn) {
                 runtime[unit.id].effects.skipTurn = false;
-                addLog(`[R${round}] <span class="log-status">${unit.name} は行動できない（復活直後）</span>`);
+                addLog(`[R${round}] <span class="log-status">${unit.name} は行動できない（復活直後）</span>`); snapEvent(round, unit.id, 'skip');
                 addDebug(`<div class="debug-note">復活直後 → 行動不可</div>`);
                 continue;
             }
             if (runtime[unit.id].effects.cannotAct > 0 || runtime[unit.id].effects.royalGuard > 0) {
-                addLog(`[R${round}] <span class="log-status">${unit.name} は行動不能</span>`);
+                addLog(`[R${round}] <span class="log-status">${unit.name} は行動不能</span>`); snapEvent(round, unit.id, 'skip');
                 addDebug(`<div class="debug-note">cannotAct/RG → 行動不可</div>`);
                 continue;
             }
             // 睡眠
             if (runtime[unit.id].effects.sleep > 0) {
-                addLog(`[R${round}] <span class="log-status">${unit.name} は眠っている（行動不可）</span>`);
+                addLog(`[R${round}] <span class="log-status">${unit.name} は眠っている（行動不可）</span>`); snapEvent(round, unit.id, 'sleep');
                 addDebug(`<div class="debug-note">睡眠 → 行動不可</div>`);
                 if (runtime[unit.id].effects.thunderstormCasting) {
                     runtime[unit.id].effects.thunderstormCasting = false;
@@ -514,7 +528,7 @@ function runBattleCore(opts) {
             // 麻痺 50%
             if (runtime[unit.id].effects.paralysis > 0) {
                 if (Math.random() < 0.5) {
-                    addLog(`[R${round}] <span class="log-status">${unit.name} は麻痺で動けない</span>`);
+                    addLog(`[R${round}] <span class="log-status">${unit.name} は麻痺で動けない</span>`); snapEvent(round, unit.id, 'para');
                     addDebug(`<div class="debug-note">麻痺 → 行動不可</div>`);
                     if (runtime[unit.id].effects.thunderstormCasting) {
                         runtime[unit.id].effects.thunderstormCasting = false;
@@ -570,6 +584,7 @@ function runBattleCore(opts) {
                     round, turn, actor: unit.name, action: 'サンダーストーム',
                     target: tName, dice, val: `${centerDmg} dmg (範囲)`, status: sts.join(' & ') || '-', trigger: '詠唱完了'
                 });
+                snapMark(unit.id);
 
                 const al = countAlive();
                 if (al.p === 0 || al.e === 0) {
@@ -1159,6 +1174,7 @@ function runBattleCore(opts) {
                 round, turn, actor: unit.name, action: chosen.action,
                 target: tName, dice, val, status, trigger: chosen.trigger
             });
+            snapMark(unit.id);
             addLog(`[R${round}] <span class="${unit.isPlayer ? 'log-action' : 'log-enemy'}">${unit.name} ➡ [${tName}] : 『${chosen.action}』 (${val} / ${status})</span>`);
 
             const al = countAlive();
@@ -1185,6 +1201,8 @@ function runBattleCore(opts) {
                 addLog(`<span class="log-dot">[毒] ${charMeta[id].name} に ${dot} dmg（残り${e.poison - 1}T）</span>`);
                 addDebug(`<div class="debug-note">[DoT] ${charMeta[id].name} 毒${dot} → HP${runtime[id].hp}（最大HP${maxHp}×10%）</div>`);
                 e.poison--;
+                if (runtime[id].hp <= 0) runtime[id].down = true;
+                snapEvent(round, id, 'dot', dot + ' dmg');
                 if (runtime[id].hp <= 0) {
                     runtime[id].down = true;
                     if (e.thunderstormCasting) {

@@ -515,6 +515,11 @@ function runExpedition(opts) {
             L(`【帰還】${result.statusLabel}  獲得 ${result.loot} SS` + (deposit ? ` + 入場料 ${deposit} 返却` : ''), 'head');
             if (result.status === 'cleared' && typeof markStageCleared === 'function') {
                 markStageCleared(dungeon.id, stage.id, mode);
+                // P9.24.0 寄り道（迷宮の残党）の報酬
+                if (applyRes && mode === 'challenge' && typeof questSideCheck === 'function') {
+                    result.questSide = questSideCheck();
+                    if (result.questSide) L(`【ギルドの依頼】寄り道「迷宮の残党」達成　報酬 ${result.questSide} SS`, 'good');
+                }
             }
             // 踏破報酬: アクセサリー抽選（実際に反映する出撃のみ）
             if (applyRes && result.status === 'cleared' && typeof rollClearDrops === 'function') {

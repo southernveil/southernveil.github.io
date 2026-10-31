@@ -165,8 +165,8 @@ function chatRenderList(scrollBottom) {
     const hiddenN = Object.keys(mute).length;
     box.innerHTML = (msgs.length ? msgs.map(m => {
         const mine = chatState.me && m.author === chatState.me;
-        return `<div class="chat-msg${mine ? ' mine' : ''}"><div class="chat-head">${mine ? `<span class="chat-name">${esc(m.name)}</span>`
-            : `<button type="button" class="chat-name" data-author="${chatSafeId(m.author)}" onclick="chatMute(this.dataset.author)" title="この人を非表示にする">${esc(m.name)}</button>`}<span class="chat-time">${esc(chatTime(m.created_at))}</span></div>
+        return `<div class="chat-msg${mine ? ' mine' : ''}"><div class="chat-head">${mine ? `<span class="chat-name">${titledNameHtml(m.name)}</span>`
+            : `<button type="button" class="chat-name" data-author="${chatSafeId(m.author)}" onclick="chatMute(this.dataset.author)" title="この人を非表示にする">${titledNameHtml(m.name)}</button>`}<span class="chat-time">${esc(chatTime(m.created_at))}</span></div>
             <div class="chat-bubble">${esc(chatPresetText(m.preset))}</div></div>`;
     }).join('') : '<div class="hint">まだ発言はありません。下の定型文から話しかけてみましょう。</div>')
         + (hiddenN ? `<div class="chat-muted">非表示にしている人：${hiddenN}人 <button type="button" class="btn btn-sm btn-blue" onclick="chatUnmuteAll()">すべて表示に戻す</button></div>` : '');
@@ -185,7 +185,7 @@ function chatRenderComposer() {
     const btns = CHAT_PRESETS.filter(p => p.cat === chatState.cat).map(p =>
         `<button type="button" class="chat-preset" ${wait > 0 || chatState.sending ? 'disabled' : ''} onclick="chatSend('${p.id}')">${esc(chatPresetText(p.id))}</button>`).join('');
     box.innerHTML = `<div class="chat-cats">${cats}</div><div class="chat-presets">${btns}</div>
-        <div class="chat-as">${esc(name)} として発言${wait > 0 ? `<span class="chat-wait">（あと${Math.ceil(wait / 1000)}秒）</span>` : ''}</div>`;
+        <div class="chat-as">${titledNameHtml(myTitledName() || name)} として発言${wait > 0 ? `<span class="chat-wait">（あと${Math.ceil(wait / 1000)}秒）</span>` : ''}</div>`;
     if (wait > 0) setTimeout(() => { if (Date.now() >= chatState.nextPostAt) chatRenderComposer(); }, Math.min(wait, 1000) + 30);
 }
 

@@ -7,6 +7,16 @@
  *  - 強化の案内は、最初に SS を持ち帰ったときにガレオンの一言で1回だけ
  */
 const GALEON = 'ガレオン';
+/** P9.24.0 話し手。g: ガレオン、k: クラウス、m: ミハル（n は地の文）。stand: 立ち姿、battle: 構え */
+const STORY_CAST = {
+    g: { name: GALEON, stand: 'img/npc/galeon.webp', face: 'img/npc/galeon-face.webp' },
+    k: { name: 'クラウス', stand: 'img/npc/klaus.webp', battle: 'img/npc/klaus-battle.webp', face: 'img/npc/klaus-face.webp' },
+    m: { name: 'ミハル', stand: 'img/npc/mihal.webp', battle: 'img/npc/mihal-battle.webp', face: 'img/npc/mihal-face.webp' }
+};
+const STORY_BGS = {
+    guild: '<img src="img/bg/guild-sm.webp" srcset="img/bg/guild-sm.webp 800w, img/bg/guild.webp 1600w" sizes="100vw" alt="" decoding="async">',
+    arena: '<img src="img/bg/arena-sm.webp" srcset="img/bg/arena-sm.webp 800w, img/bg/arena.webp 1600w" sizes="100vw" alt="" decoding="async">'
+};
 
 /** 場面。n: 地の文（ト書き）、g: ガレオンの台詞 */
 const STORY_SCENES = {
@@ -89,13 +99,71 @@ const STORY_SCENES = {
         ['g', '何か分かれば知らせる。今は、お前たちも休んでくれ'],
         ['g', '今回の依頼、ご苦労だった'],
         ['n', '還らずの森での捜索依頼は完了した。\n森の奥に潜んでいた脅威は討伐されたものの、行方不明となった冒険者たちのすべてが見つかったわけではない。\nそして、討伐した魔物に刺さっていた、見慣れない紋章の短剣。\nその出所が明らかになることは、まだなかった。']
+    ] },
+    // ---- P9.24.0 イベント「最強コンビ」ミハル＆クラウス ----
+    // cast: 出てくる人（左から）。start: 最初から見えている人。3つめの要素 { enter, exit, pose } で出入りと構えを切り替える
+    ev_duo1: { title: 'ギルドでの再会', cast: ['g', 'k', 'm'], start: ['g'], lines: [
+        ['n', 'ギルドの扉が開き、二人の冒険者が入ってくる。', { enter: ['k', 'm'] }],
+        ['k', 'よう、ガレオン。相変わらず景気の悪そうな顔をしているね'],
+        ['g', 'お前も相変わらずだな。無事だったか'],
+        ['k', 'おかげさまで。最前線の様子だが、南西側の魔物が少し増えている。今のところ大きな問題はないよ'],
+        ['m', '道も少し荒れてた。補給が遅れると困ると思う'],
+        ['g', '分かった。こちらからも手を回しておこう。……今回はしばらく滞在するのか？'],
+        ['k', 'そうだな。物資の補充もあるし、私もしばらくゆっくりさせてもらうつもりだ'],
+        ['g', 'なら、いつもの頼みだ。その間、闘技場で新人どもに稽古をつけてやってくれ'],
+        ['m', 'うん。わたしは甘いものがあれば、それでいいよ'],
+        ['k', '私は酒で頼む。できれば、いつもより少し良いものを'],
+        ['g', '分かった。用意しておく'],
+        ['n', 'クラウスはギルド内にいる冒険者たちへ目を向ける。'],
+        ['k', 'というわけで、私たちは闘技場にいます。腕に覚えのある方は、いつでもどうぞ'],
+        ['m', '待ってるね'],
+        ['n', '二人は連れ立ってギルドを出ていった。', { exit: ['k', 'm'] }]
+    ] },
+    duo_meet: { title: '闘技場での対面', event: true, bg: 'arena', cast: ['k', 'm'], start: [], lines: [
+        ['n', '闘技場では、先に別の冒険者が二人に挑んでいた。\nクラウスとミハルの連携の前に、冒険者はあっという間に敗れた。', { enter: ['k', 'm'] }],
+        ['k', 'さて、次は君たちかな？'],
+        ['m', 'うん。次の人だね。今度はどんな相手かな'],
+        ['n', 'ミハルは刀の柄に手をかけ、真剣な面持ちでこちらを見つめる。'],
+        ['m', 'クラウス、準備はいい？　全力でいくよ'],
+        ['k', '待ちなさい、ミハル。新人相手なんだから、ちゃんと手加減するんだよ'],
+        ['m', '……手加減？'],
+        ['k', 'そう。いつもの調子で斬り込んだら、稽古にならないだろう？'],
+        ['m', 'そっか。分かった。ちゃんと気をつけるね'],
+        ['k', '頼むよ。では、始めようか'],
+        ['n', '二人がそれぞれの武器を構える。', { pose: 'battle' }],
+        ['m', 'よろしくね']
+    ] },
+    duo_lose1: { title: '初めての敗北', event: true, bg: 'arena', cast: ['k', 'm'], start: ['k', 'm'], lines: [
+        ['k', 'お疲れさま。私たちに挑んだその勇気は、称賛に値するよ'],
+        ['m', 'うん。……さっきの、ちょっと良かったよ。また来てね'],
+        ['k', '急ぐ必要はないさ。いつでも待っているよ']
+    ] },
+    duo_win1: { title: '二人を撃破', event: true, bg: 'arena', cast: ['k', 'm'], start: ['k', 'm'], lines: [
+        ['k', 'いやあ、参ったね。まさか私たちが負けるとは'],
+        ['m', '強いね。わたしたちの負けだよ'],
+        ['k', '少し手加減しすぎたかな……なんてね。君たちの実力は本物だ'],
+        ['m', 'うん。いつか前線で一緒に戦える日が楽しみだね'],
+        ['k', 'ああ。その日が来るのを、気長に待っているよ']
     ] }
 };
+/** 1タップで進む短い会話（再挑戦・2回目以降の敗戦・再勝利）。rounds は敗戦のときの経過ラウンド */
+function duoShortLines(kind, rounds) {
+    if (kind === 'retry') return [
+        ['n', '闘技場を再び訪れると、二人は変わらず待っていた。'],
+        ['k', 'おや、また来てくれたんだね。何度でも歓迎するよ'],
+        ['m', 'うん。わたしたちはいつでも相手になるよ'],
+        ['k', '納得いくまで挑戦してくれ。それでは、始めようか'],
+        ['n', '二人が武器を構える。']];
+    if (kind === 'lose') return [
+        ['k', rounds >= 5 ? '惜しかったね。次は勝てるかもしれないよ' : 'いい筋してると思うよ'],
+        ['m', 'うん。また挑戦してね']];
+    return [['k', 'またやられたね。もう新人とは呼べないかな']];
+}
 const STORY_CHAPTERS = { 1: '第1章　はじまりの迷宮', 2: '第2章　還らずの森' };
 const STORY_TIP_KEY = 'sv_tip_levelup_v1';
 
 /** justSeen：この表示中（ページを開いてから）に見た場面。later の場面は、前の場面を見た直後には出さない（次に拠点を開いたとき／次の帰還で） */
-const SC = { el: null, id: null, i: 0, replay: false, pageAt: 0, justSeen: {}, busy: false };
+const SC = { el: null, id: null, i: 0, replay: false, pageAt: 0, justSeen: {}, busy: false, onDone: null };
 
 function storyIsOpen() { return !!(SC.el && document.body.contains(SC.el)); }
 
@@ -106,22 +174,27 @@ function storyIsOpen() { return !!(SC.el && document.body.contains(SC.el)); }
 function storyObjective() {
     if (typeof storySeen !== 'function' || !storySeen('c1_intro')) return null;
     const pend = storyPending();
-    if (pend) { const d = storyStepDef(pend); return { title: 'ギルドへ報告する', detail: 'ガレオンが話を待っている', scene: pend, goLabel: '報告する', chapter: d ? d.chapter : 1 }; }
+    if (pend) {
+        const d = storyStepDef(pend);
+        if (d && d.event) return { title: 'ギルドに顔を出す', detail: '見慣れない二人組が訪れているらしい', scene: pend, goLabel: '様子を見る', chapter: d.chapter };
+        return { title: 'ギルドへ報告する', detail: 'ガレオンが話を待っている', scene: pend, goLabel: '報告する', chapter: d ? d.chapter : 1, reward: d ? d.reward : 0 };
+    }
     const wait = { title: '体を休め、次の依頼を待て', detail: '次に拠点へ戻ったとき、ガレオンから話がある', chapter: 1 };
     let main;
-    if (!storySeen('c1_f1')) main = { title: 'はじまりの迷宮 F1 を調査せよ', detail: '上層で目撃された変異体の実態を調べる', go: "expGoTo('labyrinth','f1','normal')", goLabel: '出撃する', chapter: 1 };
-    else if (!storySeen('c1_b1')) main = { title: 'B1 で巣穴を突き止めろ', detail: '変異体がどこから這い出しているのかを探る', go: "expGoTo('labyrinth','b1','normal')", goLabel: '出撃する', chapter: 1 };
-    else if (!storySeen('c1_b2')) main = { title: 'B2 の上位変異体を討て', detail: '臨時の合同討伐作戦', go: "expGoTo('labyrinth','b2','normal')", goLabel: '出撃する', chapter: 1 };
+    if (!storySeen('c1_f1')) main = { step: 'c1_f1', title: 'はじまりの迷宮 F1 を調査せよ', detail: '上層で目撃された変異体の実態を調べる', go: "expGoTo('labyrinth','f1','normal')", goLabel: '出撃する', chapter: 1 };
+    else if (!storySeen('c1_b1')) main = { step: 'c1_b1', title: 'B1 で巣穴を突き止めろ', detail: '変異体がどこから這い出しているのかを探る', go: "expGoTo('labyrinth','b1','normal')", goLabel: '出撃する', chapter: 1 };
+    else if (!storySeen('c1_b2')) main = { step: 'c1_b2', title: 'B2 の上位変異体を討て', detail: '臨時の合同討伐作戦', go: "expGoTo('labyrinth','b2','normal')", goLabel: '出撃する', chapter: 1 };
     else if (!storySeen('c2_start')) main = wait;
-    else if (!storySeen('c2_a1')) main = { title: '還らずの森 エリア1 を踏破する', detail: '行方知れずの調査隊の足取りを追う', go: "expGoTo('forest','a1','normal')", goLabel: '出撃する', chapter: 2 };
-    else if (!storySeen('c2_a2')) main = { title: '還らずの森 エリア2 を踏破する', detail: '森の奥へ続く足跡をたどる', go: "expGoTo('forest','a2','normal')", goLabel: '出撃する', chapter: 2 };
-    else if (!storySeen('c2_a3')) main = { title: '還らずの森 エリア3 を踏破する', detail: '途切れた記録の続きを探す', go: "expGoTo('forest','a3','normal')", goLabel: '出撃する', chapter: 2 };
-    else if (!storySeen('c2_a4')) main = { title: '還らずの森 エリア4 を踏破する', detail: '森の最奥に何があるのかを確かめる', go: "expGoTo('forest','a4','normal')", goLabel: '出撃する', chapter: 2 };
+    else if (!storySeen('c2_a1')) main = { step: 'c2_a1', title: '還らずの森 エリア1 を踏破する', detail: '行方知れずの調査隊の足取りを追う', go: "expGoTo('forest','a1','normal')", goLabel: '出撃する', chapter: 2 };
+    else if (!storySeen('c2_a2')) main = { step: 'c2_a2', title: '還らずの森 エリア2 を踏破する', detail: '森の奥へ続く足跡をたどる', go: "expGoTo('forest','a2','normal')", goLabel: '出撃する', chapter: 2 };
+    else if (!storySeen('c2_a3')) main = { step: 'c2_a3', title: '還らずの森 エリア3 を踏破する', detail: '途切れた記録の続きを探す', go: "expGoTo('forest','a3','normal')", goLabel: '出撃する', chapter: 2 };
+    else if (!storySeen('c2_a4')) main = { step: 'c2_a4', title: '還らずの森 エリア4 を踏破する', detail: '森の最奥に何があるのかを確かめる', go: "expGoTo('forest','a4','normal')", goLabel: '出撃する', chapter: 2 };
     else main = { title: '第2章 完', detail: '次の依頼を待て', done: true, chapter: 2 };
-    // 寄り道：迷宮の残党（チャレンジ）。依頼を受けたあと、踏破していないものを1つ
+    if (main.step) { const d = storyStepDef(main.step); if (d && d.reward) main.reward = d.reward; }
+    // 寄り道：迷宮の残党（チャレンジ）。依頼を受けたあと、踏破していないものを1つ。3つすべて踏破で報酬（1回）
     if (storySeen('c1_remnant')) {
         const ch = ['f1', 'b1', 'b2'].find(s => !isStageCleared('labyrinth', s, 'challenge'));
-        if (ch) main.side = { title: `迷宮の残党を調査せよ（チャレンジ ${ch.toUpperCase()}）`, detail: '全滅すると、入場料と持ち帰るはずの SS を失う', go: `expGoTo('labyrinth','${ch}','challenge')` };
+        if (ch) main.side = { title: `迷宮の残党を調査せよ（チャレンジ ${ch.toUpperCase()}）`, detail: '全滅すると、入場料と持ち帰るはずの SS を失う', go: `expGoTo('labyrinth','${ch}','challenge')`, reward: QUEST_SIDE_REWARD };
     }
     return main;
 }
@@ -146,6 +219,7 @@ function storyQuiet() {
     if (document.getElementById('pname-overlay') && document.getElementById('pname-overlay').style.display !== 'none') return false;
     if (typeof titleIsOpen === 'function' && titleIsOpen()) return false;
     if (typeof expGate !== 'undefined' && expGate) return false;
+    if (typeof duoBusy === 'function' && duoBusy()) return false;
     const fx = document.querySelector('.fx-overlay.fx-in:not(#pp-overlay)');
     if (fx && fx.style.display !== 'none') return false;
     return true;
@@ -176,15 +250,26 @@ function storyOpen(id, opts) {
     if (!sc) return;
     opts = opts || {};
     storyClose(true);
-    SC.id = id; SC.i = 0; SC.replay = !!opts.replay;
+    SC.id = id; SC.i = 0; SC.replay = !!opts.replay; SC.onDone = opts.onDone || null;
     const def = (typeof storyStepDef === 'function') ? storyStepDef(id) : null;
+    const label = sc.event ? '闘技場イベント　最強コンビ' : (STORY_CHAPTERS[def ? def.chapter : 1] || '');
+    const cast = sc.cast || ['g'];
+    // 1人（ガレオンだけ）のときは今までどおり。複数のときは左から並べ、話している人を明るくする
+    const figs = cast.length === 1
+        ? `<div class="sc-npc" aria-hidden="true"><img src="${STORY_CAST[cast[0]].stand}" alt="" decoding="async"></div>`
+        : `<div class="sc-cast n${cast.length}" aria-hidden="true">` + cast.map((c, i) => {
+            const shown = !sc.start || sc.start.indexOf(c) >= 0;
+            return `<div class="sc-fig p${i}${shown ? ' on' : ''}" data-who="${c}"><img src="${STORY_CAST[c].stand}" alt="" decoding="async"></div>`;
+        }).join('') + `</div>`;
+    // 構えの絵は先に読み込んでおく
+    cast.forEach(c => { if (STORY_CAST[c].battle) { const im = new Image(); im.src = STORY_CAST[c].battle; } });
     const el = document.createElement('div');
-    el.id = 'story-scene'; el.className = 'sc';
+    el.id = 'story-scene'; el.className = 'sc' + (cast.length > 1 ? ' multi' : '');
     el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', sc.title);
     el.innerHTML = `
-        <div class="sc-bg" aria-hidden="true"><img src="img/bg/guild-sm.webp" srcset="img/bg/guild-sm.webp 800w, img/bg/guild.webp 1600w" sizes="100vw" alt="" decoding="async"></div>
-        <div class="sc-npc" aria-hidden="true"><img src="img/npc/galeon.webp" alt="" decoding="async"></div>
-        <div class="sc-top"><span class="sc-chap"><span>${esc(STORY_CHAPTERS[def ? def.chapter : 1] || '')}</span>　<span>${esc(sc.title)}</span></span><button type="button" class="sc-skip" onclick="event.stopPropagation();storyFinish()">スキップ</button></div>
+        <div class="sc-bg" aria-hidden="true">${STORY_BGS[sc.bg || 'guild']}</div>
+        ${figs}
+        <div class="sc-top"><span class="sc-chap"><span>${esc(label)}</span>　<span>${esc(sc.title)}</span></span><button type="button" class="sc-skip" onclick="event.stopPropagation();storyFinish()">スキップ</button></div>
         <div class="sc-box" onclick="storyNext()">
             <div class="sc-name"></div>
             <div class="sc-text" aria-live="polite" data-no-i18n></div>
@@ -197,6 +282,13 @@ function storyOpen(id, opts) {
     storyShowLine();
     requestAnimationFrame(() => el.classList.add('in'));
 }
+/** 台詞をかぎかっこで囲む（英語は “ ”）。ここで訳す（画面の自動翻訳はかっこ付きの文を探せないため） */
+function storyQuote(who, text) {
+    const en = typeof I18N !== 'undefined' && I18N.lang === 'en';
+    const raw = (typeof T === 'function') ? T(text) : text;
+    return who === 'n' ? raw : (en ? '\u201c' + raw + '\u201d' : '「' + raw + '」');
+}
+function storyWhoName(who) { return STORY_CAST[who] ? STORY_CAST[who].name : ''; }
 function storyKey(e) {
     if (!storyIsOpen()) return;
     if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight') { e.preventDefault(); storyNext(); }
@@ -207,14 +299,21 @@ function storyShowLine() {
     const ln = sc.lines[SC.i];
     const box = SC.el.querySelector('.sc-box');
     const name = SC.el.querySelector('.sc-name'), text = SC.el.querySelector('.sc-text');
-    const isG = ln[0] === 'g';
-    box.classList.toggle('narr', !isG);
-    SC.el.classList.toggle('talking', isG);
-    name.textContent = isG ? GALEON : '';
-    // 台詞はここで訳してから、言語に合ったかぎかっこで囲む（画面の自動翻訳はかっこ付きの文を探せないため）
-    const en = typeof I18N !== 'undefined' && I18N.lang === 'en';
-    const raw = (typeof T === 'function') ? T(ln[1]) : ln[1];
-    text.textContent = isG ? (en ? '\u201c' + raw + '\u201d' : '「' + raw + '」') : raw;
+    const who = ln[0], talk = who !== 'n';
+    const fx = ln[2] || {};
+    box.classList.toggle('narr', !talk);
+    box.dataset.who = who;
+    SC.el.classList.toggle('talking', talk);
+    // 出入り・構え・話し手の強調（複数人の場面）
+    SC.el.querySelectorAll('.sc-fig').forEach(f => {
+        const c = f.dataset.who;
+        if (fx.enter && fx.enter.indexOf(c) >= 0) f.classList.add('on');
+        if (fx.exit && fx.exit.indexOf(c) >= 0) f.classList.remove('on');
+        if (fx.pose && STORY_CAST[c][fx.pose]) { const im = f.querySelector('img'); if (im.getAttribute('src') !== STORY_CAST[c][fx.pose]) { im.src = STORY_CAST[c][fx.pose]; f.classList.remove('pose'); void f.offsetWidth; f.classList.add('pose'); } }
+        f.classList.toggle('speak', talk && c === who);
+    });
+    name.textContent = talk ? ((typeof T === 'function') ? T(storyWhoName(who)) : storyWhoName(who)) : '';
+    text.textContent = storyQuote(who, ln[1]);
     text.classList.remove('show'); void text.offsetWidth; text.classList.add('show');
     SC.pageAt = Date.now();
     SC.el.querySelector('.sc-more').textContent = SC.i === sc.lines.length - 1 ? '■' : '▼';
@@ -229,22 +328,35 @@ function storyNext() {
 /** 最後まで読んだ（スキップした）：見たことを記録して閉じ、続きの場面があれば続けて出す */
 async function storyFinish() {
     if (!storyIsOpen()) return;
-    const id = SC.id, replay = SC.replay;
+    const id = SC.id, replay = SC.replay, onDone = SC.onDone;
+    SC.onDone = null;
     storyClose();
-    if (replay) return;
+    // 闘技場のイベント会話（依頼の進み具合とは別）：続きの処理へ
+    if (onDone) { setTimeout(onDone, replay ? 0 : 380); return; }
+    if (replay || !(typeof storyStepDef === 'function' && storyStepDef(id))) return;
     SC.busy = true;
     try {
         if (typeof serverMode === 'function' && serverMode()) {
             const r = await serverCall('story_seen', { id: id });
             if (!r || !r.ok) console.warn('story_seen', r);
+            else storyRewardToast(r.result);
         } else if (typeof storyMarkSeen === 'function') {
-            storyMarkSeen(id);
+            storyRewardToast(storyMarkSeen(id));
         }
     } catch (e) { console.warn(e); }
     SC.busy = false;
     SC.justSeen[id] = true;
     if (typeof currentScreen !== 'undefined' && currentScreen === 'home' && typeof renderHomeQuest === 'function') renderHomeQuest();
     setTimeout(() => { if (!storyCheck()) storyTipLevelUp(); }, 450);
+}
+/** P9.24.0 依頼の報酬（と寄り道の報酬）のお知らせ */
+function storyRewardToast(r) {
+    if (!r || typeof fxToast !== 'function') return;
+    const parts = [];
+    if (r.reward > 0) parts.push('依頼の報酬　+' + r.reward + ' SS');
+    if (r.side > 0) parts.push('寄り道の報酬　+' + r.side + ' SS');
+    if (!parts.length) return;
+    fxToast(`<span class="fx-toast-fig"><img class="tip-face" src="img/npc/galeon-face.webp" alt=""></span><span class="fx-toast-main"><b>${esc(GALEON)}</b>${parts.map(t => `<span>${esc(t)}</span>`).join('')}</span>`, { tone: 'gold', sound: 'coin', key: 'quest-reward', ms: 5000 });
 }
 function storyClose(instant) {
     if (!SC.el) return;
@@ -292,8 +404,9 @@ function renderHomeQuest() {
             <div class="hq-eyebrow"><span>ギルドの依頼</span>　<span>${esc(STORY_CHAPTERS[q.chapter || 1] || '')}</span></div>
             <div class="hq-title">${esc(q.title)}</div>
             ${q.detail ? `<div class="hq-detail">${esc(q.detail)}</div>` : ''}
+            ${q.reward ? `<div class="hq-reward">報酬　${q.reward} SS</div>` : ''}
             <div class="hq-btns">${act && q.goLabel ? `<button type="button" class="btn btn-sm hq-go" onclick="${act}">${esc(q.goLabel)}</button>` : ''}<button type="button" class="hq-log" onclick="storyLogOpen()">これまでの依頼</button></div>
-            ${q.side ? `<button type="button" class="hq-side" onclick="${q.side.go}"><span class="hq-side-tag">寄り道</span><span class="hq-side-main"><b>${esc(q.side.title)}</b><small>${esc(q.side.detail)}</small></span><span class="hq-side-go" aria-hidden="true">›</span></button>` : ''}
+            ${q.side ? `<button type="button" class="hq-side" onclick="${q.side.go}"><span class="hq-side-tag">寄り道</span><span class="hq-side-main"><b>${esc(q.side.title)}</b><small>${esc(q.side.detail)}</small><small class="hq-reward">F1・B1・B2 をすべて踏破で報酬 ${q.side.reward} SS</small></span><span class="hq-side-go" aria-hidden="true">›</span></button>` : ''}
         </div></div>`;
 }
 

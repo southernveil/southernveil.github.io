@@ -89,7 +89,8 @@ function serializeState() {
                 lv10Reached: !!accountUnlocks.lv10Reached,
                 adPoints: accountUnlocks.adPoints | 0, adDay: String(accountUnlocks.adDay || ''), adToday: accountUnlocks.adToday | 0,
                 adLastAt: accountUnlocks.adLastAt | 0, yardExtra: accountUnlocks.yardExtra | 0, partyExtra: accountUnlocks.partyExtra | 0,
-                story: Array.isArray(accountUnlocks.story) ? accountUnlocks.story.slice() : []
+                story: Array.isArray(accountUnlocks.story) ? accountUnlocks.story.slice() : [],
+                questSide: !!accountUnlocks.questSide
               }
             : { targets: null, conditions: null, accessories: [], reachedStages: {}, stageCleared: {} },
         failurePool: (typeof failurePool !== 'undefined' && failurePool) ? JSON.parse(JSON.stringify(failurePool)) : {},
@@ -188,7 +189,8 @@ function applySavedData(data) {
             adPoints: Math.max(0, data.accountUnlocks.adPoints | 0), adDay: String(data.accountUnlocks.adDay || ''), adToday: Math.max(0, data.accountUnlocks.adToday | 0),
             adLastAt: Math.max(0, data.accountUnlocks.adLastAt || 0), yardExtra: Math.max(0, data.accountUnlocks.yardExtra | 0), partyExtra: Math.max(0, data.accountUnlocks.partyExtra | 0),
             story: Array.isArray(data.accountUnlocks.story)
-                ? data.accountUnlocks.story.filter((id, i, a) => typeof id === 'string' && (typeof storyStepDef !== 'function' || storyStepDef(id)) && a.indexOf(id) === i) : []
+                ? data.accountUnlocks.story.filter((id, i, a) => typeof id === 'string' && (typeof storyStepDef !== 'function' || storyStepDef(id)) && a.indexOf(id) === i) : [],
+            questSide: !!data.accountUnlocks.questSide
         };
     } else {
         accountUnlocks = { targets: null, conditions: null, accessories: [], reachedStages: {}, stageCleared: {} };
