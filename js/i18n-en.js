@@ -1208,7 +1208,8 @@ const I18N_EN = {"サザン・ヴェイル":"SOUTHERN VEIL",
 "何をすればよいか迷ったら、拠点の「ギルドの依頼」を見てください。依頼を達成すると、報酬の SS を受け取れます。":"If you're unsure what to do, check \"Guild Jobs\" at the base. Completing a job earns an SS reward.",
 "対戦ログの「バトルを見る」で、戦いの様子を再生できます。":"Use \"Watch Battle\" in a match log to replay the fight.",
 "ストーリーが進むと、闘技場でイベントバトルに挑めるようになります。何度でも挑戦でき、寿命・SS・MMR は変わりません。勝つと称号がもらえます。":"As the story progresses, you can take on an event battle at the Arena. You can challenge it any number of times; lifespan, SS and MMR don't change. Win to earn a title.",
-"称号は冒険者名の前に【】で表示されます。そのため、冒険者名には【】を使えません。":"Titles are shown in 【】 before your adventurer name, so 【】 can't be used in names."};
+"称号は冒険者名の前に【】で表示されます。そのため、冒険者名には【】を使えません。":"Titles are shown in 【】 before your adventurer name, so 【】 can't be used in names.",
+"その名前は使えません。別の名前にしてください":"That name can't be used. Please choose another."};
 const I18N_EN_PAT = [["{c}のルール","{c}'s rules"],
 ["{c}（{k}）のルール","{c} ({k})'s rules"],
 ["🔒 誰かがLv{n}に到達すると開きます","🔒 Opens when anyone reaches Lv{n}"],
@@ -1596,4 +1597,5 @@ const I18N_EN_PAT = [["{c}のルール","{c}'s rules"],
 ["【ギルドの依頼】寄り道「迷宮の残党」達成　報酬 {n} SS","[Guild Jobs] Side job \"Labyrinth Remnants\" complete — reward {n} SS"],
 ["挑戦 {n} 回","Tries: {n}"],
 ["勝利 {n} 回","Wins: {n}"],
-["{n} ラウンド","Rounds: {n}"]];
+["{n} ラウンド","Rounds: {n}"],
+["少し間をおいてから挑んでください（あと{n}秒）","Please wait a moment before challenging again ({n}s)"]];

@@ -95,6 +95,24 @@ const PVP_CONFIG = {
 };
 /** 冒険者名：最初の1回は無料、変更は祈りの欠片で行う */
 const PLAYER_NAME_MAX = 12;
+/**
+ * P9.24.2 冒険者名に使えない言葉（部分一致）。ひらがな・カタカナ、全角・半角、大文字・小文字、空白や記号の違いは区別しない。
+ * 運営・公式を名乗るものも不可。足すときはこの配列に書くだけ（サーバーの貼り直しが必要）
+ */
+const PLAYER_NAME_NG = [
+    '運営', '公式', '管理人', '管理者', 'admin', 'official', 'moderator',
+    'ちんこ', 'ちんぽ', 'まんこ', 'せっくす', 'れいぷ', 'きちがい', 'ふぁっく',
+    'fuck', 'shit', 'bitch', 'cunt', 'pussy', 'penis', 'porn', 'rape', 'nigger', 'nigga', 'faggot', 'retard', 'nazi', 'hitler'
+];
+function playerNameNorm(s) {
+    return String(s == null ? '' : s).normalize('NFKC').toLowerCase()
+        .replace(/[\u30a1-\u30f6]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60))   // カタカナ → ひらがな
+        .replace(/[\s\-_.・･ー〜~!！?？*＊#＃@＠0-9０-９]/g, '');
+}
+function playerNameNg(name) {
+    const n = playerNameNorm(name);
+    return !!n && PLAYER_NAME_NG.some(w => n.indexOf(playerNameNorm(w)) >= 0);
+}
 const PLAYER_NAME_COST = 3;
 /** 出撃のクールタイム（P9.14.0）：完了した出撃1回につき30秒。10連なら5分。サーバーが管理する（テスト実行は対象外） */
 const EXPEDITION_COOLDOWN_MS_PER_RUN = 30000;
@@ -512,6 +530,7 @@ function playerDisplayName(meta) {
  */
 const DUO_EVENT = {
     need: 'ev_duo1', title: 'twinstar', rowLimit: 4,
+    intervalMs: 3000,   // P9.24.2 連打対策：前の挑戦から最低これだけ空ける（ふつうに遊べば会話と再生でこれ以上かかる）
     units: [
         { key: 'mihal', name: 'ミハル', classId: 'samurai', level: 50, classHistory: ['warrior', 'paladin', 'samurai'],
             stats: { maxHp: 237, maxMp: 0, atk: 120, def: 38, int: 72, mnd: 69, agi: 70, dex: 77 },

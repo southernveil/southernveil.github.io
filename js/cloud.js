@@ -1,12 +1,9 @@
 /**
  * cloud.js — Phase 3a クラウドセーブ（Supabase）
- * 方針: ブラウザ保存が主、クラウドはバックアップ。クラウドが使えなくても従来どおり遊べる。
- * 依存: storage.js（serializeState / loadFromStorage / STORAGE_KEY）, supabase-js(CDN)
- * UI は cloud-ui.js が担当（cloudRenderChip / cloudShowConflict などを呼ぶ）。
+ * P9.24.2 ログイン（Supabase Auth）と接続状態の管理だけ。データの読み書きはすべてサーバー（server.js → Edge Function）
+ * 依存: supabase-js(CDN)。UI は cloud-ui.js（cloudRenderChip など）
  */
 const CLOUD_META_KEY = 'gambit_cloud_meta_v1';
-const CLOUD_BACKUP_KEY = 'gambit_save_backup_before_cloud';
-const CLOUD_PUSH_DELAY_MS = 3000;
 const CLOUD_RETRY_MS = [30000, 120000, 600000];
 const CLOUD_BANNER_FIRST = 10;
 const CLOUD_BANNER_EVERY = 50;
@@ -16,15 +13,10 @@ const cloudState = {
     detail: '',
     client: null,
     user: null,
-    pushing: false,
-    pushAgain: false,
-    pushTimer: null,
     retryTimer: null,
     retryIdx: 0,
-    dirtySeq: 0,
     armed: false,
-    allowAnon: false,    // P9.21.0 ゲストで始めることを選んだ（タイトル画面を出さずにゲストを作る）
-    conflict: null       // { row }
+    allowAnon: false     // P9.21.0 ゲストで始めることを選んだ（タイトル画面を出さずにゲストを作る）
 };
 
 /* ---------- ローカルメタ（セーブ本体には入れない） ---------- */
@@ -70,27 +62,16 @@ function cloudErrMsg(e) {
     return (e && (e.message || e.error_description || e.msg)) ? String(e.message || e.error_description || e.msg) : String(e);
 }
 
-/* ---------- 保存の呼び出し口（storage.js の persist() から） ---------- */
-function cloudOnPersist() {
-    if (serverMode()) return;
-    if (!cloudState.armed) return;
-    cloudState.dirtySeq++;
-    cloudWriteMeta({ dirty: true });
-    if (cloudState.status === 'synced') cloudSetStatus('dirty');
-    cloudSchedulePush();
-}
-function cloudSchedulePush() {
-    if (!cloudState.client || !cloudState.user || cloudState.status === 'conflict') return;
-    if (cloudState.pushTimer) clearTimeout(cloudState.pushTimer);
-    cloudState.pushTimer = setTimeout(() => { cloudState.pushTimer = null; cloudPush(); }, CLOUD_PUSH_DELAY_MS);
-}
+/* ---------- 保存の呼び出し口（storage.js の persist() から） ----------
+ * P9.24.2 データはサーバー（Edge Function）だけが保存する。ブラウザからクラウドへ直接書き込む旧方式は廃止 */
+function cloudOnPersist() { /* 何もしない */ }
 function cloudScheduleRetry() {
     if (cloudState.retryTimer) clearTimeout(cloudState.retryTimer);
     const ms = CLOUD_RETRY_MS[Math.min(cloudState.retryIdx, CLOUD_RETRY_MS.length - 1)];
     cloudState.retryIdx++;
     cloudState.retryTimer = setTimeout(() => {
         cloudState.retryTimer = null;
-        if (cloudState.user) cloudPush(); else cloudInit();
+        if (cloudState.user) { if (typeof serverRefresh === 'function') serverRefresh(); } else cloudInit();
     }, ms);
 }
 
@@ -141,8 +122,7 @@ async function cloudInit() {
             session = r.data.session;
         }
         cloudState.user = session.user;
-        if (serverMode() && typeof serverStartup === 'function') { await serverStartup(); return; }
-        await cloudStartupSync();
+        if (typeof serverStartup === 'function') await serverStartup();
     } catch (e) {
         console.warn('cloudInit failed', e);
         cloudSetStatus('offline', cloudErrMsg(e));
@@ -194,134 +174,6 @@ async function cloudCaptchaToken() {
     });
 }
 
-/* ---------- クラウド行の取得 ---------- */
-async function cloudFetchRow() {
-    const r = await cloudState.client.from('game_saves')
-        .select('data, rev, updated_at, device_id, app_version')
-        .eq('user_id', cloudState.user.id).maybeSingle();
-    if (r.error) throw r.error;
-    return r.data ? { data: r.data.data, rev: Number(r.data.rev), updatedAt: r.data.updated_at, deviceId: r.data.device_id } : null;
-}
-
-/* ---------- 起動時の判定（指示書 §5 の表） ---------- */
-async function cloudStartupSync() {
-    const uid = cloudState.user.id;
-    let meta = cloudReadMeta();
-    if (meta.userId !== uid) meta = cloudWriteMeta({ userId: uid, rev: 0 });   // 別ユーザー扱い: 初めての連携
-    const row = await cloudFetchRow();
-    const hasLocal = cloudHasLocalSave();
-
-    if (!row) {                                    // クラウドにデータなし
-        cloudWriteMeta({ rev: 0 });
-        if (hasLocal) { cloudWriteMeta({ dirty: true }); await cloudPush(); }
-        else cloudSetStatus('synced');
-        return;
-    }
-    if (!hasLocal) { cloudApplyRow(row); return; } // 新規端末: クラウドを読み込む
-    if (meta.rev === row.rev) {
-        if (meta.dirty) await cloudPush(); else cloudSetStatus('synced');
-        return;
-    }
-    if (meta.rev > 0 && meta.rev < row.rev && !meta.dirty) { cloudApplyRow(row); return; }  // 他端末で進んだ分
-    cloudRaiseConflict(row);                        // 競合
-}
-
-/* ---------- 送信 ---------- */
-async function cloudPush() {
-    if (!cloudState.client || !cloudState.user) return false;
-    if (cloudState.status === 'conflict') return false;
-    if (cloudState.pushing) { cloudState.pushAgain = true; return false; }
-    cloudState.pushing = true;
-    if (cloudState.pushTimer) { clearTimeout(cloudState.pushTimer); cloudState.pushTimer = null; }
-    cloudSetStatus('syncing');
-    const seq = cloudState.dirtySeq;
-    let ok = false;
-    try {
-        const meta = cloudReadMeta();
-        const payload = serializeState();
-        const r = await cloudState.client.rpc('save_game', {
-            p_data: payload,
-            p_expected_rev: meta.rev | 0,
-            p_app_version: (typeof APP_VERSION !== 'undefined') ? APP_VERSION : null,
-            p_device_id: cloudDeviceId()
-        });
-        if (r.error) throw r.error;
-        const res = Array.isArray(r.data) ? r.data[0] : r.data;
-        if (res && res.saved) {
-            const stillDirty = (seq !== cloudState.dirtySeq);
-            cloudWriteMeta({ rev: Number(res.new_rev), dirty: stillDirty, lastSync: Date.now() });
-            cloudState.retryIdx = 0;
-            ok = true;
-            cloudSetStatus(stillDirty ? 'dirty' : 'synced');
-            if (stillDirty) cloudSchedulePush();
-        } else {
-            const row = await cloudFetchRow();
-            if (row) cloudRaiseConflict(row);
-            else { cloudWriteMeta({ rev: 0 }); cloudSetStatus('offline', '保存に失敗しました（再試行します）'); cloudScheduleRetry(); }
-        }
-    } catch (e) {
-        console.warn('cloudPush failed', e);
-        cloudSetStatus('offline', cloudErrMsg(e));
-        cloudScheduleRetry();
-    } finally {
-        cloudState.pushing = false;
-        if (cloudState.pushAgain) { cloudState.pushAgain = false; if (ok) cloudSchedulePush(); }
-    }
-    return ok;
-}
-
-/* ---------- クラウドのデータをこの端末へ ---------- */
-function cloudApplyRow(row) {
-    let prev = null;
-    try { prev = localStorage.getItem(STORAGE_KEY); } catch (e) { /* ignore */ }
-    try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(row.data));
-        if (!loadFromStorage()) throw new Error('クラウドのデータを読み込めませんでした');
-    } catch (e) {
-        try { if (prev != null) localStorage.setItem(STORAGE_KEY, prev); } catch (e2) { /* ignore */ }
-        try { loadFromStorage(); } catch (e3) { /* ignore */ }
-        cloudSetStatus('offline', cloudErrMsg(e));
-        return false;
-    }
-    if (prev != null) { try { localStorage.setItem(CLOUD_BACKUP_KEY, prev); } catch (e) { /* ignore */ } }
-    cloudWriteMeta({ rev: row.rev, dirty: false, lastSync: Date.now() });
-    cloudState.conflict = null;
-    if (typeof ensurePartySets === 'function') ensurePartySets();
-    if (typeof renderAll === 'function') renderAll();
-    if (typeof showScreen === 'function' && typeof currentScreen !== 'undefined') showScreen(currentScreen);
-    cloudSetStatus('synced');
-    return true;
-}
-
-/* ---------- 競合 ---------- */
-function cloudSummarize(data) {
-    if (!data) return null;
-    const chars = Array.isArray(data.yardChars) ? data.yardChars : [];
-    return {
-        savedAt: data.savedAt || '',
-        ss: data.resource | 0,
-        chars: chars.length,
-        maxLv: chars.reduce((m, c) => Math.max(m, c.level | 0), 0)
-    };
-}
-function cloudRaiseConflict(row) {
-    cloudState.conflict = { row: row };
-    cloudSetStatus('conflict', '端末とクラウドのデータが食い違っています');
-    if (typeof cloudShowConflict === 'function') cloudShowConflict();
-}
-async function cloudResolveConflict(choice) {
-    const c = cloudState.conflict;
-    if (!c) return;
-    if (choice === 'cloud') {
-        cloudApplyRow(c.row);
-    } else {
-        cloudWriteMeta({ rev: c.row.rev, dirty: true });
-        cloudState.conflict = null;
-        cloudSetStatus('dirty');
-        await cloudPush();
-    }
-}
-
 /* ---------- ログイン操作 ---------- */
 function cloudRedirectUrl() {
     return location.origin + location.pathname;
@@ -346,18 +198,14 @@ async function cloudLogout() {
     if (!cloudState.client) return;
     try { await cloudState.client.auth.signOut(); } catch (e) { console.warn(e); }
     cloudState.user = null;
-    if (cloudState.pushTimer) { clearTimeout(cloudState.pushTimer); cloudState.pushTimer = null; }
     cloudWriteMeta({ loggedOut: true, userId: null, rev: 0 });
     cloudSetStatus('loggedout', 'ログアウトしました（この端末のセーブは残っています）');
     // サーバー版はタイトル画面（始め方の選択）に戻る
     if (serverMode()) setTimeout(() => location.reload(), 200);
 }
 async function cloudSyncNow() {
-    if (serverMode()) { if (!cloudState.user) await cloudInit(); else await serverRefresh(); return; }
     if (!cloudState.user) { await cloudInit(); return; }
-    cloudWriteMeta({ dirty: true });
-    cloudState.retryIdx = 0;
-    await cloudPush();
+    if (typeof serverRefresh === 'function') await serverRefresh();
 }
 
 /* ---------- 出撃回数とバナー ---------- */
@@ -377,12 +225,9 @@ function cloudDismissBanner() {
     if (typeof cloudRenderBanner === 'function') cloudRenderBanner();
 }
 
-/* ---------- 復帰時の送信 ---------- */
+/* ---------- 回線が戻ったとき ---------- */
 window.addEventListener('online', () => {
     if (!cloudState.armed) return;
     if (!cloudState.user) { if (cloudState.status === 'offline') cloudInit(); return; }
-    if (cloudReadMeta().dirty) cloudSchedulePush();
-});
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden' && cloudState.armed && cloudReadMeta().dirty && cloudState.user && cloudState.status !== 'conflict') cloudPush();
+    if (typeof serverRefresh === 'function') serverRefresh();
 });

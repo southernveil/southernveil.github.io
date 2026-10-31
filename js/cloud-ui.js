@@ -113,65 +113,6 @@ function cloudRenderBanner() {
     el.style.display = cloudBannerVisible() ? 'flex' : 'none';
 }
 
-/* ---------- 競合ダイアログ ---------- */
-function cloudSummaryHtml(title, s, extra) {
-    if (!s) return '';
-    return `<div class="cloud-side">
-        <div class="cloud-side-title">${cloudEsc(title)}</div>
-        <div class="cloud-row"><span>最終保存</span><strong>${cloudEsc(s.savedAt ? new Date(s.savedAt).toLocaleString() : '—')}</strong></div>
-        <div class="cloud-row"><span>SS</span><strong>${s.ss}</strong></div>
-        <div class="cloud-row"><span>キャラ数</span><strong>${s.chars}</strong></div>
-        <div class="cloud-row"><span>最高 Lv</span><strong>${s.maxLv}</strong></div>
-        ${extra || ''}
-    </div>`;
-}
-function cloudShowConflict() {
-    const c = cloudState.conflict;
-    if (!c) return;
-    let box = document.getElementById('cloud-conflict');
-    if (!box) {
-        box = document.createElement('div');
-        box.id = 'cloud-conflict';
-        box.className = 'cloud-overlay';
-        document.body.appendChild(box);
-    }
-    box.style.display = 'flex';
-    const local = cloudSummarize(serializeState());
-    const cloud = cloudSummarize(c.row.data);
-    box.innerHTML = `
-    <div class="cloud-dialog panel" style="max-width:560px;">
-        <h3 style="margin:0 0 6px;">データが食い違っています</h3>
-        <p class="meta" style="margin:0 0 8px;">この端末とクラウドで、別々に進んだデータがあります。どちらかを選ぶと、選ばなかった方は上書きされます。迷うときは先にそれぞれをJSONで保存してください。</p>
-        <div class="cloud-sides">
-            ${cloudSummaryHtml('この端末', local, '<button type="button" class="btn btn-sm" onclick="cloudDownloadSide(\'local\')">JSONで保存</button>')}
-            ${cloudSummaryHtml('クラウド', cloud, '<button type="button" class="btn btn-sm" onclick="cloudDownloadSide(\'cloud\')">JSONで保存</button>')}
-        </div>
-        <div class="cloud-btns" style="margin-top:12px;">
-            <button type="button" class="btn btn-blue" onclick="cloudChoose('local')">この端末のデータで上書き</button>
-            <button type="button" class="btn btn-blue" onclick="cloudChoose('cloud')">クラウドのデータで上書き</button>
-        </div>
-    </div>`;
-}
-function cloudDownloadSide(which) {
-    const c = cloudState.conflict;
-    const data = which === 'cloud' ? (c && c.row.data) : serializeState();
-    if (!data) return;
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'gambit_save_' + which + '.json';
-    a.click();
-    URL.revokeObjectURL(url);
-}
-async function cloudChoose(choice) {
-    const label = choice === 'cloud' ? 'クラウドのデータ' : 'この端末のデータ';
-    if (!confirm(label + 'を残して、もう一方を上書きします。よろしいですか？')) return;
-    const box = document.getElementById('cloud-conflict');
-    if (box) box.style.display = 'none';
-    await cloudResolveConflict(choice);
-}
-
 /* ---------- 起動 ---------- */
 cloudRenderChip();
 cloudRenderBanner();
