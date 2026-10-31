@@ -803,3 +803,6 @@ html[data-lang="en"] .scq-box p{font-family:'Cormorant Garamond',var(--serif);fo
 .bv-field{overflow:hidden;}
 #title-award.fx-overlay{background:rgba(8,6,3,.93);}
 #bv.fx-overlay,#duo-short.fx-overlay{background:#0e0c09;}
+
+/* P9.24.1 バトルの絵は頭を必ず入れる（切るなら下） */
+.bv-face img,.bv-side.big .bv-face img,.bv-side.big .bv-u.npc .bv-face img{object-position:50% 0;}
