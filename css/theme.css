@@ -815,3 +815,10 @@ html[data-lang="en"] .scq-box p{font-family:'Cormorant Garamond',var(--serif);fo
 .chat-sys .chat-time{flex:none;}
 .fb-link{display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px 12px;border:1px solid var(--line, rgba(29,27,23,.25));background:rgba(255,255,255,.5);}
 .fb-link p{margin:0;flex:1;font-size:12px;color:var(--muted);line-height:1.5;}
+/* P9.25.1 拠点の上に「遊び方」、設定のフォームのボタンは左に */
+.home-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 8px;}
+.home-top .home-player{margin:0;flex:1;min-width:0;}
+.home-guide-btn{flex:none;margin-left:auto;display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid var(--ink);background:#fbf7ec;color:var(--ink);font-family:var(--serif);font-weight:700;font-size:12px;letter-spacing:.08em;cursor:pointer;box-shadow:0 2px 0 rgba(29,27,23,.85);}
+.home-guide-btn:active{transform:translateY(2px);box-shadow:none;}
+.fb-link{flex-direction:column;align-items:flex-start;}
+.fb-link p{flex:none;}
