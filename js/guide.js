@@ -88,6 +88,29 @@ const GUIDE_SECTIONS = [
     ] }
 ];
 
+/* ---- P9.25.0 ご意見・不具合の報告（Google フォーム）。バージョン・言語・端末を入れた状態で開く ---- */
+const FEEDBACK_FORM = {
+    url: 'https://docs.google.com/forms/d/e/1FAIpQLSftOsBauKDyszPNwl-Nyoo0-fctAYK3qSJaS00Hv2X6mJ4sHQ/viewform',
+    ver: 'entry.753008283', lang: 'entry.2020601159', device: 'entry.288780867'
+};
+/** 端末のおおまかな種類（例：iPhone / Safari）。細かい型番などは送らない */
+function feedbackDevice() {
+    const ua = String(navigator.userAgent || '');
+    const os = /iPhone/.test(ua) ? 'iPhone' : /iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ? 'iPad'
+        : /Android/.test(ua) ? 'Android' : /Windows/.test(ua) ? 'Windows' : /Mac OS X|Macintosh/.test(ua) ? 'Mac' : /CrOS/.test(ua) ? 'ChromeOS' : /Linux/.test(ua) ? 'Linux' : 'Other';
+    const br = /Edg\//.test(ua) ? 'Edge' : /SamsungBrowser/.test(ua) ? 'Samsung Internet' : /Firefox|FxiOS/.test(ua) ? 'Firefox'
+        : /OPR\//.test(ua) ? 'Opera' : /Chrome|CriOS/.test(ua) ? 'Chrome' : /Safari/.test(ua) ? 'Safari' : 'Other';
+    return os + ' / ' + br + ' / ' + window.innerWidth + 'x' + window.innerHeight;
+}
+function feedbackUrl() {
+    const q = new URLSearchParams({ usp: 'pp_url' });
+    q.set(FEEDBACK_FORM.ver, typeof APP_VERSION !== 'undefined' ? APP_VERSION : '');
+    q.set(FEEDBACK_FORM.lang, (typeof I18N !== 'undefined' && I18N.lang) || 'ja');
+    q.set(FEEDBACK_FORM.device, feedbackDevice());
+    return FEEDBACK_FORM.url + '?' + q.toString();
+}
+function feedbackOpen() { window.open(feedbackUrl(), '_blank', 'noopener'); }
+
 function renderGuide() {
     const box = document.getElementById('guide-body');
     if (!box || box.dataset.done) return;
@@ -103,6 +126,7 @@ function renderGuide() {
         return `<details class="gd-sec"${i === 0 ? ' open' : ''}><summary>${esc(s.h)}</summary><div class="gd-body">${body}</div></details>`;
     }).join('') + `<div class="gd-links">
         <button type="button" class="btn btn-sm btn-blue" onclick="storyLogOpen()">ギルドの依頼を読み返す</button>
+        <button type="button" class="btn btn-sm btn-blue" onclick="feedbackOpen()">ご意見・不具合の報告</button>
         ${typeof titleOpen === 'function' ? `<button type="button" class="btn btn-sm btn-blue" onclick="titleOpen({ replay: true })">導入をもう一度見る</button>` : ''}
     </div>`;
 }

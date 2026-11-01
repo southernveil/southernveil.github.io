@@ -164,6 +164,12 @@ function chatRenderList(scrollBottom) {
     const msgs = chatState.msgs.filter(m => !mute[m.author]);
     const hiddenN = Object.keys(mute).length;
     box.innerHTML = (msgs.length ? msgs.map(m => {
+        // P9.25.0 全体のお知らせ（システムの一行）
+        if (typeof m.preset === 'string' && m.preset.indexOf('sys:') === 0) {
+            const ev = (typeof FEED_EVENTS !== 'undefined') ? FEED_EVENTS[m.preset.slice(4)] : null;
+            if (!ev) return '';
+            return `<div class="chat-sys" data-no-i18n><span class="chat-sys-ic" aria-hidden="true">📜</span><span class="chat-sys-text"><b>${titledNameHtml(m.name)}</b>${esc(chatLang() === 'en' ? ev.en : ev.ja)}</span><span class="chat-time">${esc(chatTime(m.created_at))}</span></div>`;
+        }
         const mine = chatState.me && m.author === chatState.me;
         return `<div class="chat-msg${mine ? ' mine' : ''}"><div class="chat-head">${mine ? `<span class="chat-name">${titledNameHtml(m.name)}</span>`
             : `<button type="button" class="chat-name" data-author="${chatSafeId(m.author)}" onclick="chatMute(this.dataset.author)" title="この人を非表示にする">${titledNameHtml(m.name)}</button>`}<span class="chat-time">${esc(chatTime(m.created_at))}</span></div>

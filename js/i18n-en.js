@@ -1210,7 +1210,10 @@ const I18N_EN = {"サザン・ヴェイル":"SOUTHERN VEIL",
 "ストーリーが進むと、闘技場でイベントバトルに挑めるようになります。何度でも挑戦でき、寿命・SS・MMR は変わりません。勝つと称号がもらえます。":"As the story progresses, you can take on an event battle at the Arena. You can challenge it any number of times; lifespan, SS and MMR don't change. Win to earn a title.",
 "称号は冒険者名の前に【】で表示されます。そのため、冒険者名には【】を使えません。":"Titles are shown in 【】 before your adventurer name, so 【】 can't be used in names.",
 "その名前は使えません。別の名前にしてください":"That name can't be used. Please choose another.",
-"条件と対象の「味方」には、自分自身も含まれます。たとえば「味方のHPが50%以下」は、自分の HP が減ったときにも当てはまります。":"\"Ally\" in conditions and targets always includes the character itself. For example, \"Ally HP ≤ 50%\" also applies when the character's own HP drops."};
+"条件と対象の「味方」には、自分自身も含まれます。たとえば「味方のHPが50%以下」は、自分の HP が減ったときにも当てはまります。":"\"Ally\" in conditions and targets always includes the character itself. For example, \"Ally HP ≤ 50%\" also applies when the character's own HP drops.",
+"ご意見・不具合の報告":"Feedback & Bug Reports",
+"フォームを開く":"Open Form",
+"遊んでみた感想や、おかしな動きを見つけたときは、こちらから送ってください。":"Send us your thoughts on the game, or let us know if something isn't working right."};
 const I18N_EN_PAT = [["{c}のルール","{c}'s rules"],
 ["{c}（{k}）のルール","{c} ({k})'s rules"],
 ["🔒 誰かがLv{n}に到達すると開きます","🔒 Opens when anyone reaches Lv{n}"],

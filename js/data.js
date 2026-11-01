@@ -514,6 +514,37 @@ const STORY_STEPS = [
 const QUEST_SIDE_REWARD = 150;
 const QUEST_SIDE_STAGES = ['labyrinth:f1:challenge', 'labyrinth:b1:challenge', 'labyrinth:b2:challenge'];
 
+/* ---- P9.25.0 全体のお知らせ（チャットに出るシステムの一行）。アカウントごとに初めての1回だけ ----
+ * サーバーが出来事を確かめて chat_messages に preset = 'sys:<code>' で入れる。文はゲーム側で言語に合わせて組み立てる */
+const FEED_EVENTS = {
+    arrive: { ja: 'さんがサザン・ヴェイルに到着しました', en: ' has arrived at Southern Veil' },
+    lv10:   { ja: 'さんの冒険者が Lv10 に到達しました', en: "'s adventurer has reached Lv10" },
+    lv20:   { ja: 'さんの冒険者が Lv20 に到達しました', en: "'s adventurer has reached Lv20" },
+    acc10:  { ja: 'さんのアクセサリーが Lv10 に到達しました', en: "'s accessory has reached Lv10" },
+    acc20:  { ja: 'さんのアクセサリーが Lv20 に到達しました', en: "'s accessory has reached Lv20" },
+    ch1:    { ja: 'さんが第1章「はじまりの迷宮」を終えました', en: ' has completed Chapter 1: Labyrinth of Beginnings' },
+    chB2:   { ja: 'さんがはじまりの迷宮（チャレンジ）B2 を踏破しました', en: ' has cleared Labyrinth of Beginnings (Challenge) B2' },
+    ch2:    { ja: 'さんが第2章「還らずの森」を終えました', en: ' has completed Chapter 2: The Forest of No Return' },
+    duo:    { ja: 'さんが最強コンビを撃破しました', en: ' has defeated the Strongest Duo' }
+};
+/** いまの状態で達成している出来事（FEED_EVENTS の順） */
+function feedAchieved(meta) {
+    const done = {};
+    if (meta && meta.playerName) done.arrive = true;
+    const chars = (typeof yardChars !== 'undefined' ? yardChars : []).concat(typeof retiredChars !== 'undefined' ? retiredChars : []);
+    const lv = chars.reduce((m, c) => Math.max(m, c.level | 0), 0);
+    if (lv >= 10) done.lv10 = true;
+    if (lv >= 20) done.lv20 = true;
+    const al = (typeof accessories !== 'undefined' ? accessories : []).reduce((m, a) => Math.max(m, a.level | 0), 0);
+    if (al >= 10) done.acc10 = true;
+    if (al >= 20) done.acc20 = true;
+    if (typeof storySeen === 'function' && storySeen('c1_b2')) done.ch1 = true;
+    if (typeof isStageCleared === 'function' && isStageCleared('labyrinth', 'b2', 'challenge')) done.chB2 = true;
+    if (typeof storySeen === 'function' && storySeen('c2_a4')) done.ch2 = true;
+    if (meta && meta.duo && (meta.duo.wins | 0) > 0) done.duo = true;
+    return Object.keys(FEED_EVENTS).filter(k => done[k]);
+}
+
 /* ---- P9.24.0 称号（冒険者名の前に【】で付く。名前の文字数には数えない）---- */
 const TITLE_DEFS = { twinstar: { name: '双星を越えし者' } };
 function titleNameOf(id) { return (id && TITLE_DEFS[id]) ? TITLE_DEFS[id].name : ''; }
