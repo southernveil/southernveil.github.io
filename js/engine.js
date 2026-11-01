@@ -152,7 +152,7 @@ function checkCondition(condIdx, unit, runtime, round) {
     const allyDownExists = () => Object.keys(runtime).some(id =>
         charMeta[id] && charMeta[id].isPlayer === unit.isPlayer && runtime[id].down);
     const allyHpBelow = (pct) => Object.keys(charMeta).some(id =>
-        charMeta[id].isPlayer === unit.isPlayer && id !== unit.id && !runtime[id].down &&
+        charMeta[id].isPlayer === unit.isPlayer && !runtime[id].down &&   // P9.24.3 「味方」には自分自身も含む
         runtime[id].hp <= charMeta[id].maxHp * pct);
 
     // 既存インデックス互換
