@@ -822,3 +822,8 @@ html[data-lang="en"] .scq-box p{font-family:'Cormorant Garamond',var(--serif);fo
 .home-guide-btn:active{transform:translateY(2px);box-shadow:none;}
 .fb-link{flex-direction:column;align-items:flex-start;}
 .fb-link p{flex:none;}
+/* P9.25.2 募集の引き直しボタン（候補の上と下） */
+.recruit-again{display:flex;justify-content:center;margin:6px 0 10px;}
+.recruit-again .btn{min-width:220px;}
+.recruit-cands .recruit-again{grid-column:1/-1;align-items:center;margin:0;}
+.recruit-cands .recruit-again .btn{height:auto;align-self:center;}

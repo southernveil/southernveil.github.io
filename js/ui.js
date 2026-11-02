@@ -291,6 +291,7 @@ function updateResourceUI() {
     });
     const pb = document.getElementById('recruit-btn-paid');
     if (pb) pb.disabled = !canSpendResource(RECRUIT_PAID_COST);
+    document.querySelectorAll('#recruit-cands-paid .recruit-again .btn').forEach(b => { b.disabled = !canSpendResource(RECRUIT_PAID_COST); });
 }
 
 function showScreen(name) {
@@ -669,7 +670,10 @@ function renderRecruitScreen() {
             box.innerHTML = '<div class="hint">まだ募集していません</div>';
             return;
         }
-        box.innerHTML = pool.map((c, i) => candidateCardHtml(kind, c, i)).join('');
+        // P9.25.2 引き直しのボタンを候補のすぐ上と下に（上まで戻らなくてよいように）
+        const paidNg = kind === 'paid' && !canSpendResource(RECRUIT_PAID_COST);
+        const again = `<div class="recruit-again"><button type="button" class="btn btn-sm${kind === 'paid' ? ' recruit-paid-btn' : ''}" ${paidNg ? 'disabled' : ''} onclick="recruitDraw('${kind}')">↻ ${kind === 'paid' ? 'もう一度募集する（SS ' + RECRUIT_PAID_COST + '）' : 'もう一度募集する（無料）'}</button></div>`;
+        box.innerHTML = again + pool.map((c, i) => candidateCardHtml(kind, c, i)).join('') + again;
         if (fresh) recruitRevealCands(box, pool);
     });
 }

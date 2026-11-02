@@ -21,8 +21,8 @@ const RECRUIT_PAID_COST = 150; // PROVISIONAL
 
 /** 排出率（残りはノーマル）。ユーザー指定値 */
 const RECRUIT_RATES = {
-    free: { ur: 0,    rare: 0.01 },
-    paid: { ur: 0.01, rare: 0.03 }
+    free: { ur: 0,    rare: 0.03 },   // P9.25.2 レア 1% → 3%
+    paid: { ur: 0.03, rare: 0.08 }    // P9.25.2 UR 1% → 3%、レア 3% → 8%
 };
 
 /** 暫定: 初期値ボーナスの大きさ。HP はスケールが違うので別枠 */

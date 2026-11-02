@@ -258,13 +258,13 @@ function fxSnapshot() {
     try {
         const chars = {};
         (yardChars || []).forEach(c => {
-            const o = { id: c.id, name: c.name, classId: c.classId, level: c.level || 1, lifespan: c.lifespan, rarity: c.rarity || 'normal',
+            const o = { id: c.id, name: c.name, classId: c.classId, portrait: c.portrait || null, level: c.level || 1, lifespan: c.lifespan, rarity: c.rarity || 'normal',
                 initBonus: c.initBonus || {}, growthBonus: c.growthBonus || {} };
             FX_STATS.forEach(([k]) => { o[k] = c[k] | 0; });
             chars[c.id] = o;
         });
         const retired = {};
-        (retiredChars || []).forEach(c => { retired[c.id] = { id: c.id, name: c.name, classId: c.classId, level: c.level || 1, lifespan: 0, reason: c.retireReason || 'lifespan' }; });
+        (retiredChars || []).forEach(c => { retired[c.id] = { id: c.id, name: c.name, classId: c.classId, portrait: c.portrait || null, level: c.level || 1, lifespan: 0, reason: c.retireReason || 'lifespan' }; });
         const u = accountUnlocks || {};
         const accs = {};
         (accessories || []).forEach(a => { accs[a.id] = { id: a.id, defId: a.defId, level: a.level || 1 }; });
