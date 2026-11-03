@@ -1214,7 +1214,10 @@ const I18N_EN = {"サザン・ヴェイル":"SOUTHERN VEIL",
 "ご意見・不具合の報告":"Feedback & Bug Reports",
 "フォームを開く":"Open Form",
 "遊んでみた感想や、おかしな動きを見つけたときは、こちらから送ってください。":"Send us your thoughts on the game, or let us know if something isn't working right.",
-"↻ もう一度募集する（無料）":"↻ Recruit Again (Free)"};
+"↻ もう一度募集する（無料）":"↻ Recruit Again (Free)",
+"出撃するパーティ":"Party to deploy",
+"このパーティにはメンバーがいません。":"This party has no members.",
+"編成へ":"Edit Party"};
 const I18N_EN_PAT = [["{c}のルール","{c}'s rules"],
 ["{c}（{k}）のルール","{c} ({k})'s rules"],
 ["🔒 誰かがLv{n}に到達すると開きます","🔒 Opens when anyone reaches Lv{n}"],
@@ -1604,4 +1607,5 @@ const I18N_EN_PAT = [["{c}のルール","{c}'s rules"],
 ["勝利 {n} 回","Wins: {n}"],
 ["{n} ラウンド","Rounds: {n}"],
 ["少し間をおいてから挑んでください（あと{n}秒）","Please wait a moment before challenging again ({n}s)"],
-["↻ もう一度募集する（SS {n}）","↻ Recruit Again ({n} SS)"]];
+["↻ もう一度募集する（SS {n}）","↻ Recruit Again ({n} SS)"],
+["{n}人","{n}"]];

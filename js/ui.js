@@ -22,6 +22,7 @@ function renderAll() {
     if (document.getElementById('rule-editor')) renderEditor();
     if (typeof updateResourceUI === 'function') updateResourceUI();
     if (typeof renderPartySetTabs === 'function') renderPartySetTabs();
+    if (typeof renderPartyPickers === 'function') renderPartyPickers();
     if (typeof renderRuleWho === 'function') renderRuleWho();
     if (typeof renderRecruitScreen === 'function') renderRecruitScreen();
     if (typeof renderYardScreen === 'function' && document.getElementById('screen-yard') &&
@@ -353,6 +354,36 @@ function renderPartySetTabs() {
         box.appendChild(btn);
     });
     });
+}
+
+/**
+ * P9.25.4 出撃するパーティを選ぶ（遠征の画面と拠点）。選んだパーティは「編成」のタブと同じ状態になる
+ * data-party-pick="full"：タブ＋メンバーの顔　/ "tabs"：タブだけ
+ */
+function renderPartyPickers() {
+    const boxes = document.querySelectorAll('[data-party-pick]');
+    if (!boxes.length || typeof ensurePartySets !== 'function') return;
+    ensurePartySets();
+    const members = s => (s.partyIds || []).map(id => yardChars.find(c => c.id === id)).filter(Boolean);
+    boxes.forEach(box => {
+        const tabs = partySets.map((s, i) => `<button type="button" class="pp-tab${i === activePartySetIndex ? ' active' : ''}" onclick="partyPick(${i})"><b>${esc(s.name)}</b><small>${members(s).length}人</small></button>`).join('');
+        let body = '';
+        if (box.dataset.partyPick === 'full') {
+            const m = members(partySets[activePartySetIndex] || { partyIds: [] });
+            body = m.length
+                ? `<div class="pp-faces">${m.map(ch => `<span class="pp-face" title="${esc(ch.name)}"><img src="${esc(portraitUrlOf(ch, false))}" alt="" loading="lazy" decoding="async"><small>Lv${ch.level || 1}</small></span>`).join('')}</div>`
+                : `<div class="pp-empty">このパーティにはメンバーがいません。<button type="button" class="btn btn-sm" onclick="showScreen('yard')">編成へ</button></div>`;
+        }
+        box.innerHTML = `<div class="pp-label">出撃するパーティ</div><div class="pp-tabs">${tabs}</div>${body}`;
+    });
+}
+async function partyPick(i) {
+    if (i === activePartySetIndex) return;
+    await switchPartySet(i);
+    renderPartyPickers();
+    if (typeof renderHomeParty === 'function') renderHomeParty();
+    if (typeof expUpdateRunButtons === 'function') expUpdateRunButtons();
+    if (typeof renderExpInfo === 'function' && currentScreen === 'expedition') renderExpInfo();
 }
 
 function promptRenamePartySet() {

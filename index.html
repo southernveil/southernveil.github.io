@@ -15,9 +15,9 @@
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@500;700;900&family=Cormorant+Garamond:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/main.css?v=P9.25.3">
-    <link rel="stylesheet" href="css/theme.css?v=P9.25.3">
-    <link rel="stylesheet" href="css/fx.css?v=P9.25.3">
+    <link rel="stylesheet" href="css/main.css?v=P9.25.4">
+    <link rel="stylesheet" href="css/theme.css?v=P9.25.4">
+    <link rel="stylesheet" href="css/fx.css?v=P9.25.4">
 </head>
 <body>
 <!-- 起動時のタイトル（接続が終わると消える。操作の邪魔はしない） -->
@@ -94,6 +94,7 @@
         </div>
         <div class="mat">
             <div class="mat-label" id="home-party-label">出撃編成</div>
+            <div class="party-pick party-pick-home" data-party-pick="tabs"></div>
             <div class="mat-row" id="home-party-row"></div>
             <div class="mat-hint">台座の数字は残りの寿命。タップでキャラ詳細（立ち絵の変更もここから）</div>
         </div>
@@ -246,6 +247,7 @@
     <div class="exp-wrap exp-two-col">
         <div class="panel exp-settings">
             <h2>遠征</h2>
+            <div class="party-pick" data-party-pick="full"></div>
             <div class="exp-grid">
                 <label>ダンジョン<select id="exp-dungeon" onchange="onExpDungeonChange()"></select></label>
                 <label>ステージ<select id="exp-stage" onchange="renderExpInfo()"></select></label>
@@ -400,32 +402,32 @@
     </div>
 </div>
 
-<script src="js/i18n-en.js?v=P9.25.3"></script>
-<script src="js/i18n.js?v=P9.25.3"></script>
-<script src="js/common.js?v=P9.25.3"></script>
-<script src="js/standee.js?v=P9.25.3"></script>
-<script src="js/fx.js?v=P9.25.3"></script>
-<script src="js/data.js?v=P9.25.3"></script>
-<script src="js/model.js?v=P9.25.3"></script>
-<script src="js/storage.js?v=P9.25.3"></script>
-<script src="js/vendor-supabase-2.45.4.js?v=P9.25.3"></script>
-<script src="js/cloud-config.js?v=P9.25.3"></script>
-<script src="js/title.js?v=P9.25.3"></script>
-<script src="js/story.js?v=P9.25.3"></script>
-<script src="js/guide.js?v=P9.25.3"></script>
-<script src="js/cloud.js?v=P9.25.3"></script>
-<script src="js/recruit.js?v=P9.25.3"></script>
-<script src="js/engine.js?v=P9.25.3"></script>
-<script src="js/expedition.js?v=P9.25.3"></script>
-<script src="js/batch.js?v=P9.25.3"></script>
-<script src="js/ads.js?v=P9.25.3"></script>
-<script src="js/ui.js?v=P9.25.3"></script>
-<script src="js/batch-ui.js?v=P9.25.3"></script>
-<script src="js/server.js?v=P9.25.3"></script>
-<script src="js/chat.js?v=P9.25.3"></script>
-<script src="js/arena.js?v=P9.25.3"></script>
-<script src="js/battleview.js?v=P9.25.3"></script>
-<script src="js/duo.js?v=P9.25.3"></script>
-<script src="js/cloud-ui.js?v=P9.25.3"></script>
+<script src="js/i18n-en.js?v=P9.25.4"></script>
+<script src="js/i18n.js?v=P9.25.4"></script>
+<script src="js/common.js?v=P9.25.4"></script>
+<script src="js/standee.js?v=P9.25.4"></script>
+<script src="js/fx.js?v=P9.25.4"></script>
+<script src="js/data.js?v=P9.25.4"></script>
+<script src="js/model.js?v=P9.25.4"></script>
+<script src="js/storage.js?v=P9.25.4"></script>
+<script src="js/vendor-supabase-2.45.4.js?v=P9.25.4"></script>
+<script src="js/cloud-config.js?v=P9.25.4"></script>
+<script src="js/title.js?v=P9.25.4"></script>
+<script src="js/story.js?v=P9.25.4"></script>
+<script src="js/guide.js?v=P9.25.4"></script>
+<script src="js/cloud.js?v=P9.25.4"></script>
+<script src="js/recruit.js?v=P9.25.4"></script>
+<script src="js/engine.js?v=P9.25.4"></script>
+<script src="js/expedition.js?v=P9.25.4"></script>
+<script src="js/batch.js?v=P9.25.4"></script>
+<script src="js/ads.js?v=P9.25.4"></script>
+<script src="js/ui.js?v=P9.25.4"></script>
+<script src="js/batch-ui.js?v=P9.25.4"></script>
+<script src="js/server.js?v=P9.25.4"></script>
+<script src="js/chat.js?v=P9.25.4"></script>
+<script src="js/arena.js?v=P9.25.4"></script>
+<script src="js/battleview.js?v=P9.25.4"></script>
+<script src="js/duo.js?v=P9.25.4"></script>
+<script src="js/cloud-ui.js?v=P9.25.4"></script>
 </body>
 </html>
