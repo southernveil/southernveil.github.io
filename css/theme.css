@@ -827,3 +827,5 @@ html[data-lang="en"] .scq-box p{font-family:'Cormorant Garamond',var(--serif);fo
 .recruit-again .btn{min-width:220px;}
 .recruit-cands .recruit-again{grid-column:1/-1;align-items:center;margin:0;}
 .recruit-cands .recruit-again .btn{height:auto;align-self:center;}
+/* P9.25.3 キャラ育成：直前に上げたキャラの行を目立たせる */
+.train-row.train-just{box-shadow:0 0 0 2px #c9a64e,0 0 14px rgba(201,166,78,.35);}

@@ -1586,14 +1586,19 @@ function renderTrainScreen() {
         box.innerHTML = '<div class="hint">キャラがいません。<button type="button" class="btn btn-sm" onclick="showScreen(\'recruit\')">募集へ</button></div>';
         return;
     }
+    // P9.25.3 並びはパーティ順 → 控えは加入順。レベルで並べ替えると、上げた直後に行が入れ替わって別のキャラを上げたように見えるため
     const order = id => { const i = partyIds.indexOf(id); return i < 0 ? 99 : i; };
-    const rows = yardChars.slice().sort((a, b) => order(a.id) - order(b.id) || (b.level || 1) - (a.level || 1) || String(a.name).localeCompare(String(b.name), 'ja'));
+    const join = id => yardChars.findIndex(c => c.id === id);
+    const rows = yardChars.slice().sort((a, b) => order(a.id) - order(b.id) || join(a.id) - join(b.id));
     box.innerHTML = rows.map(ch => trainRowHtml(ch, ss, partyIds.indexOf(ch.id) >= 0)).join('');
+    if (trainLastId) { const el = box.querySelector(`.train-row[data-train-id="${trainLastId}"]`); if (el) el.classList.add('train-just'); }
 }
 /** n 回続けてレベルアップ（1回ずつサーバーへ。SS不足や上限で止まる） */
+let trainLastId = null;   // P9.25.3 直前に上げたキャラ（行を光らせる）
 async function onTrainLevelUp(id, n) {
     if (trainBusy) return;
     trainBusy = true;
+    trainLastId = id;
     renderTrainScreen();
     try {
         for (let i = 0; i < n; i++) {
