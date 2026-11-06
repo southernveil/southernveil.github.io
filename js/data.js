@@ -45,11 +45,11 @@ const AD_BONUS_SS_RATE = 0.2;      // ためた出撃分の報酬SSにかける�
 const CHAT_POST_INTERVAL_MS = 10000;   // 1人あたりの発言間隔
 const CHAT_KEEP_DAYS = 7;              // チャットの保存期間（古いものはサーバーが削除）
 const CHAT_PRESET_CATS = [
+    { id: 'stamp', ja: 'スタンプ', en: 'Stamps' },   // P9.26.1 一番左・最初に開く
     { id: 'greet', ja: 'あいさつ', en: 'Greetings' },
     { id: 'sortie', ja: '遠征', en: 'Expedition' },
     { id: 'react', ja: '反応', en: 'Reactions' },
-    { id: 'base', ja: '拠点', en: 'Base' },
-    { id: 'stamp', ja: 'スタンプ', en: 'Stamps' }
+    { id: 'base', ja: '拠点', en: 'Base' }
 ];
 const CHAT_PRESETS = [
     { id: 'hello', cat: 'greet', ja: 'こんにちは', en: 'Hello' },

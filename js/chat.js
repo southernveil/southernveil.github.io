@@ -9,7 +9,7 @@ const CHAT_SEEN_KEY = 'gambit_chat_seen_v1';   // { notice: 最後に見たお�
 const CHAT_MUTE_KEY = 'gambit_chat_mute_v1';   // { author: 名前 } 非表示にした相手（この端末だけ）
 const CHAT_NOTICE_KIND = { info: 'お知らせ', maint: 'メンテナンス', event: 'イベント', update: '更新' };
 
-const chatState = { tab: 'notice', cat: 'greet', notices: [], msgs: [], timer: null, me: null, nextPostAt: 0, loaded: false, error: '', sending: false };
+const chatState = { tab: 'notice', cat: 'stamp', notices: [], msgs: [], timer: null, me: null, nextPostAt: 0, loaded: false, error: '', sending: false };
 
 function chatLang() { return (typeof I18N !== 'undefined' && I18N.lang === 'en') ? 'en' : 'ja'; }
 function chatRead(key) { try { return JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch (e) { return {}; } }
