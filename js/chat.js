@@ -18,7 +18,14 @@ function chatClient() {
     if (typeof serverMode !== 'function' || !serverMode() || typeof serverGetClient !== 'function') return null;
     return serverGetClient();
 }
+/** P9.26.0 スタンプの絵（言語に合わせる） */
+function chatStampHtml(st, cls) {
+    const lang = chatLang();
+    return `<img class="${cls}" src="img/stamp/${st.id}_${lang}.webp" alt="${esc(lang === 'en' ? st.en : st.ja)}" loading="lazy" decoding="async" width="256" height="256">`;
+}
 function chatPresetText(id) {
+    const st = chatStampOf(id);
+    if (st) return chatLang() === 'en' ? st.en : st.ja;
     const p = CHAT_PRESETS.find(x => x.id === id);
     if (!p) return '…';
     return (chatLang() === 'en' && p.en) ? p.en : p.ja;
@@ -173,7 +180,7 @@ function chatRenderList(scrollBottom) {
         const mine = chatState.me && m.author === chatState.me;
         return `<div class="chat-msg${mine ? ' mine' : ''}"><div class="chat-head">${mine ? `<span class="chat-name">${titledNameHtml(m.name)}</span>`
             : `<button type="button" class="chat-name" data-author="${chatSafeId(m.author)}" onclick="chatMute(this.dataset.author)" title="この人を非表示にする">${titledNameHtml(m.name)}</button>`}<span class="chat-time">${esc(chatTime(m.created_at))}</span></div>
-            <div class="chat-bubble">${esc(chatPresetText(m.preset))}</div></div>`;
+            ${chatStampOf(m.preset) ? chatStampHtml(chatStampOf(m.preset), 'chat-stamp') : `<div class="chat-bubble">${esc(chatPresetText(m.preset))}</div>`}</div>`;
     }).join('') : '<div class="hint">まだ発言はありません。下の定型文から話しかけてみましょう。</div>')
         + (hiddenN ? `<div class="chat-muted">非表示にしている人：${hiddenN}人 <button type="button" class="btn btn-sm btn-blue" onclick="chatUnmuteAll()">すべて表示に戻す</button></div>` : '');
     if (scrollBottom) box.scrollTop = box.scrollHeight;
@@ -188,9 +195,12 @@ function chatRenderComposer() {
     }
     const wait = Math.max(0, chatState.nextPostAt - Date.now());
     const cats = CHAT_PRESET_CATS.map(c => `<button type="button" class="chat-cat${chatState.cat === c.id ? ' active' : ''}" onclick="chatSetCat('${c.id}')">${esc(chatLang() === 'en' ? c.en : c.ja)}</button>`).join('');
-    const btns = CHAT_PRESETS.filter(p => p.cat === chatState.cat).map(p =>
-        `<button type="button" class="chat-preset" ${wait > 0 || chatState.sending ? 'disabled' : ''} onclick="chatSend('${p.id}')">${esc(chatPresetText(p.id))}</button>`).join('');
-    box.innerHTML = `<div class="chat-cats">${cats}</div><div class="chat-presets">${btns}</div>
+    const off = wait > 0 || chatState.sending ? 'disabled' : '';
+    const btns = chatState.cat === 'stamp'
+        ? CHAT_STAMPS.map(st => `<button type="button" class="chat-stamp-pick" ${off} onclick="chatSend('st:${st.id}')" title="${esc(chatLang() === 'en' ? st.en : st.ja)}">${chatStampHtml(st, '')}</button>`).join('')
+        : CHAT_PRESETS.filter(p => p.cat === chatState.cat).map(p =>
+            `<button type="button" class="chat-preset" ${off} onclick="chatSend('${p.id}')">${esc(chatPresetText(p.id))}</button>`).join('');
+    box.innerHTML = `<div class="chat-cats">${cats}</div><div class="${chatState.cat === 'stamp' ? 'chat-stamps' : 'chat-presets'}">${btns}</div>
         <div class="chat-as">${titledNameHtml(myTitledName() || name)} として発言${wait > 0 ? `<span class="chat-wait">（あと${Math.ceil(wait / 1000)}秒）</span>` : ''}</div>`;
     if (wait > 0) setTimeout(() => { if (Date.now() >= chatState.nextPostAt) chatRenderComposer(); }, Math.min(wait, 1000) + 30);
 }

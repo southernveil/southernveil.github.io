@@ -849,3 +849,13 @@ html[data-lang="en"] .scq-box p{font-family:'Cormorant Garamond',var(--serif);fo
 .party-pick-home .pp-tabs{flex-wrap:nowrap;gap:4px;}
 .party-pick-home .pp-tab{padding:3px 8px;gap:4px;}
 .party-pick-home .pp-tab b{font-size:12px;}
+
+/* ===== P9.26.0 スタンプ ===== */
+.chat-stamp{display:block;width:132px;height:132px;margin-top:2px;}
+.chat-msg.mine .chat-stamp{margin-left:auto;}
+.chat-stamps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;max-height:220px;overflow-y:auto;}
+.chat-stamp-pick{border:1px solid transparent;background:none;padding:2px;cursor:pointer;border-radius:6px;}
+.chat-stamp-pick img{display:block;width:100%;height:auto;aspect-ratio:1;}
+.chat-stamp-pick:not(:disabled):hover{border-color:var(--ink);background:rgba(255,255,255,.4);}
+.chat-stamp-pick:not(:disabled):active{transform:scale(.94);}
+.chat-stamp-pick:disabled{opacity:.4;cursor:not-allowed;}

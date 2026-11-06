@@ -1217,7 +1217,8 @@ const I18N_EN = {"サザン・ヴェイル":"SOUTHERN VEIL",
 "↻ もう一度募集する（無料）":"↻ Recruit Again (Free)",
 "出撃するパーティ":"Party to deploy",
 "このパーティにはメンバーがいません。":"This party has no members.",
-"編成へ":"Edit Party"};
+"編成へ":"Edit Party",
+"スタンプ":"Stamps"};
 const I18N_EN_PAT = [["{c}のルール","{c}'s rules"],
 ["{c}（{k}）のルール","{c} ({k})'s rules"],
 ["🔒 誰かがLv{n}に到達すると開きます","🔒 Opens when anyone reaches Lv{n}"],

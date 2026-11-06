@@ -48,7 +48,8 @@ const CHAT_PRESET_CATS = [
     { id: 'greet', ja: 'あいさつ', en: 'Greetings' },
     { id: 'sortie', ja: '遠征', en: 'Expedition' },
     { id: 'react', ja: '反応', en: 'Reactions' },
-    { id: 'base', ja: '拠点', en: 'Base' }
+    { id: 'base', ja: '拠点', en: 'Base' },
+    { id: 'stamp', ja: 'スタンプ', en: 'Stamps' }
 ];
 const CHAT_PRESETS = [
     { id: 'hello', cat: 'greet', ja: 'こんにちは', en: 'Hello' },
@@ -76,6 +77,24 @@ const CHAT_PRESETS = [
     { id: 'broke', cat: 'base', ja: 'SSが足りない…', en: 'Out of SS…' },
     { id: 'levelup', cat: 'base', ja: 'レベルが上がりました', en: 'Leveled up' }
 ];
+/**
+ * P9.26.0 スタンプ。チャットには 'st:<id>' として保存し、表示時に言語に合った絵（img/stamp/<id>_ja|en.webp）を出す
+ * 足すときは、ここに1行と、img/stamp/ に絵を2枚（サーバーの貼り直しが必要）
+ */
+const CHAT_STAMPS = [
+    { id: 'greet', ja: 'よろしく！', en: 'Nice to meet you!' },
+    { id: 'hello', ja: 'こんにちは', en: 'Hello!' },
+    { id: 'thanks', ja: 'ありがとう！', en: 'Thank you!' },
+    { id: 'goodwork', ja: 'おつかれさま', en: 'Good work!' },
+    { id: 'congrats', ja: 'おめでとう', en: 'Congratulations!' },
+    { id: 'nice', ja: 'ナイス！', en: 'Well done!' },
+    { id: 'roger', ja: '了解', en: 'Understood!' },
+    { id: 'sweets', ja: '甘いもの！', en: 'Something sweet!' }
+];
+function chatStampOf(preset) {
+    if (typeof preset !== 'string' || preset.indexOf('st:') !== 0) return null;
+    return CHAT_STAMPS.find(s => s.id === preset.slice(3)) || null;
+}
 /** 常設PVP（闘技場・P9.17.0）。数値はここだけで管理する（サーバーとブラウザで共通） */
 const PVP_CONFIG = {
     cycleMs: 6 * 3600000,          // 周期：6時間
